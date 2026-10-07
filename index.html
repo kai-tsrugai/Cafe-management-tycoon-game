@@ -41,7 +41,6 @@
             align-items: center;
         }
 
-        /* モバイルコンテナ (100dvh & safe-area対応) */
         #game-container {
             width: 100%;
             max-width: 480px;
@@ -55,7 +54,6 @@
             box-shadow: 0 0 25px rgba(0,0,0,0.6);
         }
 
-        /* ヘッダー */
         header {
             background: var(--accent-brown);
             color: #ffffff;
@@ -98,7 +96,6 @@
             text-align: center;
         }
 
-        /* ビューポート（スクロール領域） */
         #viewport {
             flex: 1;
             padding: 12px;
@@ -185,7 +182,7 @@
             background: #fff;
         }
 
-        /* 店内マップ・ビジュアル要素 */
+        /* リアルタイム店内マップ描画エリア */
         .cafe-map {
             width: 100%;
             background: #e8d8c8;
@@ -240,7 +237,7 @@
             border: 2px solid #a1887f;
             border-radius: 10px;
             padding: 8px;
-            min-height: 85px;
+            min-height: 95px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -275,7 +272,6 @@
             100% { transform: translateY(-3px); }
         }
 
-        /* ボトムナビゲーション */
         #nav-tabs {
             display: flex;
             background: var(--accent-brown);
@@ -366,7 +362,7 @@
 
     <nav id="nav-tabs" style="display: none;">
         <button class="tab-item active" id="tab-floor" onclick="switchTab('floor')">
-            <span style="font-size:1.1rem;">🏪</span><span>店内マップ</span>
+            <span style="font-size:1.1rem;">🏪</span><span>店内様子</span>
         </button>
         <button class="tab-item" id="tab-kitchen" onclick="switchTab('kitchen')">
             <span style="font-size:1.1rem;">🍳</span><span>厨房・価格</span>
@@ -403,10 +399,9 @@
         totalLaborCost: 0,
 
         staff: { partTime: 0, fullTime: 0, skillLevel: 1 },
-        equipment: { counter: false, coffeeMaker: false, kitchenLine: false, patisserieOven: false },
-        ingredients: { beans: 0, milk: 0, flour: 0, fruits: 0 },
+        equipment: { counter: true, coffeeMaker: false, kitchenLine: false, patisserieOven: false },
+        ingredients: { beans: 50, milk: 0, flour: 0, fruits: 0 },
 
-        // 店内テーブル席の状態
         tables: [
             { id: 1, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
             { id: 2, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
@@ -415,7 +410,7 @@
         ],
 
         recipes: [
-            { id: 'coffee', name: 'ハウスブレンド', category: 'drink', icon: '☕', reqEquip: 'coffeeMaker', ingKey: 'beans', ingCost: 80, stdPrice: 550, price: 550, unlocked: true, stock: 0 },
+            { id: 'coffee', name: 'ハウスブレンド', category: 'drink', icon: '☕', reqEquip: 'coffeeMaker', ingKey: 'beans', ingCost: 80, stdPrice: 550, price: 550, unlocked: true, stock: 10 },
             { id: 'latte', name: '濃厚カフェラテ', category: 'drink', icon: '🥛', reqEquip: 'coffeeMaker', ingKey: 'milk', ingCost: 110, stdPrice: 650, price: 650, unlocked: false, stock: 0 },
             { id: 'toast', name: '厚切りバタートースト', category: 'food', icon: '🍞', reqEquip: 'kitchenLine', ingKey: 'flour', ingCost: 150, stdPrice: 700, price: 700, unlocked: false, stock: 0 },
             { id: 'cake', name: '特製ショートケーキ', category: 'sweet', icon: '🍰', reqEquip: 'patisserieOven', ingKey: 'fruits', ingCost: 350, stdPrice: 1500, price: 1500, unlocked: false, stock: 0 }
@@ -431,7 +426,7 @@
     function init() {
         render();
         setInterval(gameClockLoop, 3000);
-        setInterval(customerLoop, 1200);
+        setInterval(customerLoop, 1500);
         setInterval(updateSeats, 1000);
     }
 
@@ -521,39 +516,38 @@
         if (state.currentTab === 'staff') renderStaff(view);
         if (state.currentTab === 'promo') renderPromo(view);
         if (state.currentTab === 'report') renderReport(view);
-        if (state.currentTab === 'reviews') renderReviews(view);
         if (state.currentTab === 'shop') renderShop(view);
     }
 
     function renderFloorMap(view) {
-        let staffIcons = '';
+        let staffIcons = '👨‍🍳 店主';
         const totalStaff = state.staff.partTime + state.staff.fullTime;
-        for (let i = 0; i < Math.min(totalStaff, 3); i++) {
-            staffIcons += '👨‍🍳 ';
+        for (let i = 0; i < totalStaff; i++) {
+            staffIcons += ' 🙋‍♂️';
         }
 
         let html = `
             <div class="card">
                 <div class="card-title">
-                    <span>🏪 店内リアルタイムマップ</span>
-                    <span style="font-size:0.75rem; color:var(--text-sub);">稼働状況</span>
+                    <span>🏪 店内リアルタイムビジュアル</span>
+                    <span style="font-size:0.75rem; color:var(--text-sub);">リアルタイム稼働中</span>
                 </div>
                 
                 <div class="cafe-map">
-                    <div class="zone-title">🍳 厨房・バックヤード</div>
+                    <div class="zone-title">🍳 厨房・カウンター</div>
                     <div class="kitchen-area">
-                        <span>${staffIcons || '👨‍🍳 (ワンマンワンオペ)'}</span>
+                        <span>${staffIcons}</span>
                         <span style="font-size:0.75rem; color:#4e342e; font-weight:bold;">
-                            ${state.equipment.coffeeMaker ? '☕マシン稼働中' : '手淹れ抽出'}
+                            ${state.equipment.coffeeMaker ? '☕マシン設置済' : 'ハンドドリップ'}
                         </span>
                     </div>
 
                     <div class="counter-area">
-                        <span>🧾 レジ・カウンター</span>
-                        <span style="font-size:0.75rem;">${state.equipment.counter ? '🟢 オープン' : '🔴 未導入'}</span>
+                        <span>🧾 レジカウンター</span>
+                        <span style="font-size:0.75rem; color:var(--accent-green);">🟢 営業中</span>
                     </div>
 
-                    <div class="zone-title">🪑 客席（テーブル）</div>
+                    <div class="zone-title">🪑 客席フロア（全4席）</div>
                     <div class="seating-area">
         `;
 
@@ -568,7 +562,7 @@
                 content = `
                     <div class="speech-bubble">💭 注文中...</div>
                     <div class="customer-avatar">${t.customer}</div>
-                    <div style="font-size:0.7rem; font-weight:bold; color:var(--accent-brown); margin-top:2px;">着席中</div>
+                    <div style="font-size:0.7rem; font-weight:bold; color:var(--accent-brown); margin-top:2px;">来店・注文中</div>
                 `;
             } else if (t.state === 'eating') {
                 content = `
@@ -585,34 +579,58 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="card">
+                <div class="card-title">⭐ お客様のリアルタイム評価</div>
+                <div id="reviews-list">
+        `;
+
+        state.reviews.slice(-3).reverse().forEach(r => {
+            html += `
+                <div class="review-box">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:2px;">
+                        <span>${r.stars}</span>
+                        <span style="color:var(--text-sub); font-size:0.75rem;">${r.author}</span>
+                    </div>
+                    <div>"${r.text}"</div>
+                </div>
+            `;
+        });
+
+        html += `
+                </div>
+            </div>
         `;
 
         view.innerHTML = html;
     }
 
     function updateSeats() {
+        let changed = false;
         state.tables.forEach(t => {
             if (t.occupied) {
                 t.timer--;
                 if (t.state === 'waiting' && t.timer <= 0) {
                     t.state = 'eating';
-                    t.timer = 4;
+                    t.timer = 5;
+                    changed = true;
                 } else if (t.state === 'eating' && t.timer <= 0) {
                     t.occupied = false;
                     t.customer = null;
                     t.item = null;
                     t.state = 'empty';
+                    changed = true;
                 }
             }
         });
 
-        if (state.currentTab === 'floor') {
+        if (changed && state.currentTab === 'floor') {
             renderFloorMap(document.getElementById('viewport'));
         }
     }
 
     function customerLoop() {
-        if (!state.hasShop || !state.equipment.counter) return;
+        if (!state.hasShop) return;
 
         const emptyTable = state.tables.find(t => !t.occupied);
         if (!emptyTable) return;
@@ -620,7 +638,7 @@
         const available = state.recipes.filter(r => r.unlocked && r.stock > 0);
         if (available.length === 0) return;
 
-        let chance = 0.5 * state.buzzMultiplier;
+        let chance = 0.6 * state.buzzMultiplier;
         if (state.weather === '雨') chance *= 0.6;
 
         if (Math.random() < chance) {
@@ -636,18 +654,21 @@
             emptyTable.customer = CUSTOMER_AVATARS[Math.floor(Math.random() * CUSTOMER_AVATARS.length)];
             emptyTable.item = target;
             emptyTable.state = 'waiting';
-            emptyTable.timer = 2;
+            emptyTable.timer = 3;
 
             state.money += target.price;
             state.totalRevenue += target.price;
             state.reputation += 2;
-            showFloatText(`+${target.price.toLocaleString()}円`);
+            showFloatText(`+${target.price.toLocaleString()}円 (${target.name})`);
 
-            if (Math.random() < 0.25) {
-                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が美味しかったです！お店の雰囲気も素敵です。`);
+            if (Math.random() < 0.3) {
+                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が美味しかったです！また来ます。`);
             }
 
             renderHeader();
+            if (state.currentTab === 'floor') {
+                renderFloorMap(document.getElementById('viewport'));
+            }
         }
     }
 
@@ -659,19 +680,19 @@
             <div class="card-title">📦 原材料仕入れ</div>
             <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>☕ 珈琲豆 (50杯): 4,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.beans}</small></span>
+                    <span>☕ 珈琲豆 (50杯分): 4,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.beans}</small></span>
                     <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('beans', 4000, 50)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🥛 特選牛乳 (30杯): 3,300円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.milk}</small></span>
+                    <span>🥛 特選牛乳 (30杯分): 3,300円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.milk}</small></span>
                     <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('milk', 3300, 30)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🍞 パン資材 (20食): 3,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.flour}</small></span>
+                    <span>🍞 パン資材 (20食分): 3,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.flour}</small></span>
                     <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('flour', 3000, 20)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🍰 果物資材 (10食): 3,500円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.fruits}</small></span>
+                    <span>🍰 果物資材 (10食分): 3,500円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.fruits}</small></span>
                     <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('fruits', 3500, 10)">購入</button>
                 </div>
             </div>
@@ -685,7 +706,7 @@
             card.innerHTML = `
                 <div class="card-title">
                     <span>${r.icon} ${r.name}</span>
-                    <span style="font-size:0.75rem; background:#ffe0b2; padding:2px 8px; border-radius:12px; color:#e65100;">仕込み数: ${r.stock}個</span>
+                    <span style="font-size:0.75rem; background:#ffe0b2; padding:2px 8px; border-radius:12px; color:#e65100;">店舗在庫: ${r.stock}個</span>
                 </div>
                 <div style="font-size:0.78rem; color:var(--text-sub);">原価: 約${r.ingCost}円 | 標準価格: ${r.stdPrice}円</div>
                 
@@ -709,7 +730,7 @@
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">👥 スタッフの採用・育成</div>
-                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:12px;">スタッフを採用すると混雑時でもスムーズに配膳が行えます。</p>
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:12px;">スタッフを雇うとサービス向上で店舗評価が上がりやすくなります。</p>
                 
                 <div style="font-size:0.82rem; display:flex; flex-direction:column; gap:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
@@ -721,7 +742,7 @@
                         <button style="padding:8px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="hireStaff('fullTime', 150000)">採用 (15万円)</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🎓 研修レベル: <strong>Lv.${state.staff.skillLevel}</strong><br><small style="color:var(--text-sub);">提供スピード +15%</small></span>
+                        <span>🎓 研修レベル: <strong>Lv.${state.staff.skillLevel}</strong><br><small style="color:var(--text-sub);">回転率・顧客満足度UP</small></span>
                         <button style="padding:8px 12px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="trainStaff(100000)">研修 (10万円)</button>
                     </div>
                 </div>
@@ -733,7 +754,7 @@
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">📢 プロモーション活動</div>
-                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:10px;">宣伝により集客力（バズ率）を高め、来店頻度を上昇させます。</p>
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:10px;">宣伝により集客力（バズ率）を高め、来店頻度を大幅に上昇させます。</p>
 
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div style="border:1px solid var(--border-color); padding:10px; border-radius:8px;">
@@ -750,7 +771,7 @@
 
                     <div style="border:1px solid var(--border-color); padding:10px; border-radius:8px;">
                         <strong>📺 グルメ誌・WEB取材獲得</strong><br>
-                        <small style="color:var(--text-sub);">費用: 300,000円 | 集客力 +200% (大爆発)</small>
+                        <small style="color:var(--text-sub);">費用: 300,000円 | 集客力 +200% (超大盛況)</small>
                         <button class="action-btn" onclick="runPromo(300000, 2.0)">取材を依頼する</button>
                     </div>
                 </div>
@@ -781,32 +802,11 @@
         `;
     }
 
-    function renderReviews(view) {
-        let html = `<div class="card"><div class="card-title">⭐ お客様のリアル口コミ</div>`;
-        state.reviews.slice(-6).reverse().forEach(r => {
-            html += `
-                <div class="review-box">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:2px;">
-                        <span>${r.stars}</span>
-                        <span style="color:var(--text-sub); font-size:0.75rem;">${r.author}</span>
-                    </div>
-                    <div>"${r.text}"</div>
-                </div>
-            `;
-        });
-        html += `</div>`;
-        view.innerHTML = html;
-    }
-
     function renderShop(view) {
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">⚙️ 設備投資・メニュー解放</div>
                 <div style="font-size:0.82rem; display:flex; flex-direction:column; gap:12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
-                        <span>🧾 メインカウンターレジ<br><small style="color:var(--text-sub);">${state.equipment.counter ? '✅導入完了' : '350,000円'}</small></span>
-                        ${!state.equipment.counter ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('counter', 350000)">購入</button>` : ''}
-                    </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
                         <span>☕ エスプレッソマシン<br><small style="color:var(--text-sub);">${state.equipment.coffeeMaker ? '✅導入完了' : '480,000円 (ラテ解放)'}</small></span>
                         ${!state.equipment.coffeeMaker ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('coffeeMaker', 480000)">購入</button>` : ''}
