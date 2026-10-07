@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>モバイル専用 カフェ経営シミュレーション Pro</title>
+    <title>カフェ経営シミュレーション Grand Master Pro</title>
     <style>
         :root {
-            --bg-color: #f7f3ee;
+            --bg-color: #f5efe6;
             --card-bg: #ffffff;
-            --text-main: #2b2118;
-            --text-sub: #7a6b5d;
-            --accent-brown: #4a2c11;
-            --accent-brown-light: #6f4727;
-            --accent-green: #2e7d32;
+            --text-main: #2b1f17;
+            --text-sub: #6e5c4f;
+            --accent-brown: #3e2723;
+            --accent-brown-light: #5d4037;
+            --accent-gold: #d4af37;
             --accent-amber: #e65100;
             --accent-red: #c62828;
-            --border-color: #e0d5c7;
+            --accent-green: #2e7d32;
+            --border-color: #d7ccc8;
             --safe-area-bottom: env(safe-area-inset-bottom, 0px);
             --safe-area-top: env(safe-area-inset-top, 0px);
         }
@@ -27,7 +28,7 @@
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
         }
 
         html, body {
@@ -35,7 +36,7 @@
             height: 100%;
             height: 100dvh;
             overflow: hidden;
-            background-color: #0d0805;
+            background-color: #120c08;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -51,7 +52,7 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 25px rgba(0,0,0,0.6);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
         header {
@@ -60,14 +61,14 @@
             padding: calc(var(--safe-area-top) + 6px) 10px 6px 10px;
             flex-shrink: 0;
             z-index: 20;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
         }
 
@@ -77,35 +78,36 @@
         }
 
         .save-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.3);
             color: #fff;
             font-size: 0.65rem;
             padding: 2px 6px;
             border-radius: 4px;
             cursor: pointer;
         }
+        .save-btn:active { background: rgba(255,255,255,0.4); }
 
         .env-bar {
             display: flex;
             justify-content: space-between;
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.3);
             padding: 4px 8px;
             border-radius: 6px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             margin-top: 4px;
-            color: #ffecb3;
+            color: #ffe0b2;
         }
 
         .stats-bar {
             display: grid;
-            grid-template-columns: 1.2fr 0.9fr 0.9fr;
-            gap: 4px;
+            grid-template-columns: 1.1fr 0.9fr 0.9fr 0.9fr;
+            gap: 2px;
             background: var(--accent-brown-light);
             padding: 4px 6px;
             border-radius: 6px;
             margin-top: 4px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: bold;
             color: #ffffff;
             text-align: center;
@@ -120,21 +122,21 @@
             flex-direction: column;
             gap: 10px;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 20px;
+            padding-bottom: 25px;
         }
 
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             border: 1px solid var(--border-color);
             flex-shrink: 0;
         }
 
         .card-title {
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
@@ -146,12 +148,12 @@
 
         .action-btn {
             width: 100%;
-            min-height: 40px;
-            padding: 8px;
+            min-height: 38px;
+            padding: 6px 10px;
             border: none;
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #ffffff;
             background: var(--accent-brown);
             cursor: pointer;
@@ -161,38 +163,59 @@
             align-items: center;
             gap: 6px;
         }
-
         .action-btn:active { opacity: 0.85; transform: scale(0.98); }
         .action-btn:disabled { background: #b0bec5 !important; opacity: 0.7; transform: none; cursor: not-allowed; }
 
-        /* 店内ビジュアルマップ */
+        .btn-small {
+            width: auto;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            min-height: 28px;
+        }
+
+        .badge {
+            background: var(--accent-gold);
+            color: #3e2723;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: bold;
+        }
+
+        /* 店内マップ */
         .cafe-map {
             width: 100%;
-            background: #e8d8c8;
-            border: 2px solid #6f4727;
+            background: #efebe9;
+            border: 2px solid #5d4037;
             border-radius: 10px;
             padding: 8px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: all 0.3s;
         }
+
+        /* カスタム内装スタイル */
+        .map-style-retro { background: #d7ccc8; border-color: #3e2723; }
+        .map-style-modern { background: #eceff1; border-color: #37474f; }
+        .map-style-natural { background: #e8f5e9; border-color: #2e7d32; }
 
         .zone-title {
             font-weight: bold;
-            font-size: 0.7rem;
-            color: #5c3d2e;
+            font-size: 0.68rem;
+            color: #4e342e;
             margin-bottom: 2px;
             border-bottom: 1px dashed #a1887f;
         }
 
         .kitchen-area {
-            background: #d7ccc8;
+            background: rgba(255,255,255,0.7);
             border-radius: 6px;
             padding: 6px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
 
         .seating-area {
@@ -203,10 +226,10 @@
 
         .table-node {
             background: #ffffff;
-            border: 1.5px solid #a1887f;
+            border: 1.5px solid #8d6e63;
             border-radius: 8px;
             padding: 6px;
-            min-height: 80px;
+            min-height: 75px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -222,12 +245,13 @@
             border: 1px solid #795548;
             border-radius: 8px;
             padding: 1px 5px;
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: bold;
             white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* 手動コーヒー抽出ミニゲーム */
+        /* 抽出ミニゲーム */
         .brew-box {
             background: #fff8e1;
             border: 2px dashed #ffa000;
@@ -236,14 +260,7 @@
             text-align: center;
         }
 
-        .brew-step {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #e65100;
-            margin-bottom: 6px;
-        }
-
-        /* 携帯（スマートフォン）UI */
+        /* スマホUI */
         .phone-shell {
             background: #111;
             border: 4px solid #333;
@@ -268,7 +285,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            max-height: 340px;
+            max-height: 330px;
             overflow-y: auto;
             padding: 4px;
         }
@@ -277,19 +294,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             cursor: pointer;
             text-align: center;
         }
 
         .app-badge {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin-bottom: 2px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
@@ -303,10 +320,10 @@
             display: flex;
             flex-direction: column;
             overflow-y: auto;
-            max-height: 340px;
+            max-height: 330px;
         }
 
-        /* ボトムナビゲーション */
+        /* ボトムナビ */
         #nav-tabs {
             display: flex;
             background: var(--accent-brown);
@@ -318,13 +335,13 @@
 
         .tab-item {
             flex: 1;
-            min-width: 55px;
+            min-width: 50px;
             height: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 0.6rem;
+            font-size: 0.58rem;
             font-weight: bold;
             color: #d7ccc8;
             border: none;
@@ -343,19 +360,29 @@
             position: fixed;
             color: #1b5e20;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.95rem;
             pointer-events: none;
             animation: floatUp 0.85s forwards;
             z-index: 999;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.92);
             padding: 3px 8px;
             border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         @keyframes floatUp {
             0% { opacity: 0; transform: translate(-50%, 10px); }
             20% { opacity: 1; transform: translate(-50%, 0); }
             100% { opacity: 0; transform: translate(-50%, -25px); }
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -368,18 +395,19 @@
             <div class="save-controls">
                 <button class="save-btn" onclick="saveGame()">💾 保存</button>
                 <button class="save-btn" onclick="loadGame()">📂 復元</button>
-                <button class="save-btn" onclick="resetGame()" style="background:rgba(200,0,0,0.5);">🔄 消去</button>
+                <button class="save-btn" onclick="resetGame()" style="background:rgba(200,0,0,0.5);">🔄 リセット</button>
             </div>
         </div>
         <div class="env-bar">
             <span>🕒 <span id="time-display">Day 1 - 08:00</span></span>
             <span>☀️ <span id="weather-display">晴れ</span></span>
-            <span>🔥 集客: <span id="buzz-display">100%</span></span>
+            <span>🔥 集客力: <span id="buzz-display">100%</span></span>
         </div>
         <div class="stats-bar">
-            <div>💰 <span id="money">3,000,000</span>円</div>
-            <div>⭐ <span id="reputation">0</span>pt</div>
-            <div>👥 従業員: <span id="staff-count">0</span>名</div>
+            <div>💰<span id="money">3,000,000</span>円</div>
+            <div>⭐<span id="reputation">0</span>pt</div>
+            <div>🏬<span id="branch-count">1</span>店</div>
+            <div>👥<span id="staff-count">0</span>名</div>
         </div>
     </header>
 
@@ -388,15 +416,17 @@
     <nav id="nav-tabs" style="display: none;">
         <button class="tab-item active" id="tab-floor" onclick="switchTab('floor')">🏪 店内</button>
         <button class="tab-item" id="tab-brew" onclick="switchTab('brew')">☕ 手作業</button>
+        <button class="tab-item" id="tab-recipe" onclick="switchTab('recipe')">🧪 開発</button>
+        <button class="tab-item" id="tab-decor" onclick="switchTab('decor')">🎨 内装</button>
         <button class="tab-item" id="tab-kitchen" onclick="switchTab('kitchen')">📦 仕入れ</button>
+        <button class="tab-item" id="tab-expand" onclick="switchTab('expand')">🏬 展開</button>
         <button class="tab-item" id="tab-phone" onclick="switchTab('phone')">📱 携帯</button>
-        <button class="tab-item" id="tab-staff" onclick="switchTab('staff')">👥 人事</button>
         <button class="tab-item" id="tab-report" onclick="switchTab('report')">📊 経営</button>
     </nav>
 </div>
 
 <script>
-    const SAVE_KEY = 'CAFE_SIM_SAVE_DATA_PRO_V1';
+    const SAVE_KEY = 'CAFE_SIM_PRO_GRAND_MASTER_SAVE';
 
     let state = {
         day: 1,
@@ -409,58 +439,75 @@
         weather: '晴れ',
         buzzMultiplier: 1.0,
 
-        // 固定費
+        // 店舗展開
+        branches: [
+            { id: 1, name: '本店', unlocked: true, rent: 15000, level: 1 }
+        ],
+
+        // インテリアカスタム
+        decor: {
+            style: 'standard', // standard, retro, modern, natural
+            tableType: '木製テーブル',
+            plant: 'パキラ'
+        },
+
+        // ライバル & グランプリ
+        rivalActive: false,
+        grandPrixDay: 30,
+        trophies: 0,
+
+        // 固定費 & 財務
         fixedCosts: { rent: 15000, utility: 5000 },
         totalFixedCostPaid: 0,
-
         totalRevenue: 0,
         totalCost: 0,
         totalLaborCost: 0,
 
         staff: { partTime: 0, fullTime: 0 },
-        ingredients: { beans: 20, milk: 0, flour: 0 }, // 最初から仕入れないと限定的
+        ingredients: { beans: 25, milk: 5, flour: 5, specialBeans: 0 },
 
-        // 手動コーヒー抽出のミニゲーム状態 (0:未開始, 1:豆研磨, 2:蒸らし, 3:抽出完了)
+        // 手動抽出ミニゲーム (0:未開始, 1:豆研磨, 2:蒸らし, 3:完了)
         brewStep: 0,
 
-        // スマホ画面の状態
+        // レシピ
+        recipes: [
+            { id: 'coffee', name: '職人ブレンド', icon: '☕', ingKey: 'beans', price: 600, stock: 5, charm: 10, isWeatherLimited: false },
+            { id: 'latte', name: '濃厚ラテ', icon: '🥛', ingKey: 'milk', price: 700, stock: 2, charm: 12, isWeatherLimited: false },
+            { id: 'icebrew', name: '極冷アイスコーヒー', icon: '🧊', ingKey: 'beans', price: 750, stock: 0, charm: 15, isWeatherLimited: true, weatherReq: '晴れ' },
+            { id: 'hotcocoa', name: 'ほっこり雨の日ココア', icon: '☕', ingKey: 'milk', price: 700, stock: 0, charm: 15, isWeatherLimited: true, weatherReq: '雨' }
+        ],
+
+        // 携帯画面状態
         phoneApp: 'home',
+        news: [
+            { time: 'Day 1', text: '【ama news】本日のカフェ通りは穏やかな天候です。経営を開始しましょう！' }
+        ],
+        messages: [
+            { sender: 'ビルオーナー', text: '開店おめでとうございます！毎日の固定費（家賃・光熱費）の引き落としにご注意ください。' }
+        ],
+        mails: [
+            { from: '日本カフェ協会', subject: '第1回 カフェグランプリ開催のおしらせ', body: 'Day 30 に審査員が来店します。評判⭐と魅力を高めておきましょう！' }
+        ],
 
         tables: [
             { id: 1, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
             { id: 2, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
             { id: 3, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
             { id: 4, occupied: false, customer: null, item: null, state: 'empty', timer: 0 }
-        ],
-
-        recipes: [
-            { id: 'coffee', name: '職人淹れブレンド', icon: '☕', ingKey: 'beans', ingCost: 80, stdPrice: 600, price: 600, stock: 5 },
-            { id: 'latte', name: '濃厚ラテ', icon: '🥛', ingKey: 'milk', ingCost: 120, stdPrice: 700, price: 700, stock: 0 }
-        ],
-
-        news: [
-            { time: '08:00', text: '【ama news】本日のカフェ通りは穏やかな天候となる見込みです。' }
-        ],
-        messages: [
-            { sender: 'ビルオーナー', text: '毎月（毎日）の固定費（家賃・光熱費20,000円）の振り込みをお忘れなく。' }
-        ],
-        mails: [
-            { from: '珈琲問屋アマゾン', subject: '高品質な豆の入荷案内', body: '厳選された珈琲豆が入荷しました。仕入れタブよりいつでもご注文いただけます。' }
         ]
     };
 
-    const CUSTOMER_AVATARS = ['👨‍💼', '👩‍💼', '👵', '👨‍🎓', '👩‍🎨', '🧔', '👩‍💻'];
+    const CUSTOMER_AVATARS = ['👨‍💼', '👩‍💼', '👵', '👨‍🎓', '👩‍🎨', '🧔', '👩‍💻', '👴'];
 
     function init() {
         if (!loadGame(true)) {
             render();
         }
         setInterval(gameClockLoop, 3000);
-        setInterval(customerLoop, 1500);
+        setInterval(customerLoop, 1600);
         setInterval(updateSeats, 1000);
     }
 
-    /* ---- セーブ＆ロード機能 ---- */
     function saveGame() {
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
         showFloatText('💾 データを保存しました！');
@@ -483,25 +530,29 @@
     }
 
     function resetGame() {
-        if (confirm('ゲームデータを消去して最初からやり直しますか？')) {
+        if (confirm('すべての進捗を初期化しますか？')) {
             localStorage.removeItem(SAVE_KEY);
             location.reload();
         }
     }
 
-    /* ---- ゲームループ & 固定費処理 ---- */
+    /* ---- 時間進行 ＆ イベント（固定費・グランプリ・ライバル） ---- */
     function gameClockLoop() {
         if (!state.hasShop) return;
 
         state.hour = (state.hour + 1) % 24;
+
         if (state.hour === 0) {
             state.hour = 7;
             state.day += 1;
+
+            // 天候シャッフル
             const weathers = ['晴れ', '晴れ', '曇り', '雨'];
             state.weather = weathers[Math.floor(Math.random() * weathers.length)];
 
-            // 固定費＆人件費の自動引き落とし
-            const totalFixed = state.fixedCosts.rent + state.fixedCosts.utility;
+            // 固定費 & 人件費落とし
+            let activeBranchesRent = state.branches.filter(b => b.unlocked).reduce((sum, b) => sum + b.rent, 0);
+            const totalFixed = activeBranchesRent + state.fixedCosts.utility;
             const dailyLabor = (state.staff.partTime * 9600) + (state.staff.fullTime * 16000);
             const totalDailyDeduct = totalFixed + dailyLabor;
 
@@ -510,22 +561,48 @@
             state.totalLaborCost += dailyLabor;
 
             showFloatText(`固定費・人件費引落: -${totalDailyDeduct.toLocaleString()}円`);
-            addNews(`【ama news】Day ${state.day} がスタートしました。本日も営業を開始します。`);
+            addNews(`【ama news】Day ${state.day} が開始。天候は「${state.weather}」です。`);
+
+            // ライバル店舗イベント発生判定（Day 10以降 ランダム）
+            if (state.day > 10 && Math.random() < 0.2 && !state.rivalActive) {
+                state.rivalActive = true;
+                state.buzzMultiplier = 0.6;
+                addNews('【緊急】近所に大手チェーン「メガカフェ」がオープン！集客力がダウンしました。');
+                addMessage('スタッフ', 'ライバル店に対抗するため、レシピ開発や内装リノベーションを行いましょう！');
+            }
+
+            // カフェグランプリ判定 (Day 30, 60, 90...)
+            if (state.day % state.grandPrixDay === 0) {
+                triggerGrandPrix();
+            }
         }
 
         renderHeader();
     }
 
+    function triggerGrandPrix() {
+        const score = state.reputation + (state.branches.length * 50) + (state.recipes.length * 10);
+        let rank = 'B';
+        let prize = 500000;
+
+        if (score > 300) { rank = 'S (優勝)'; prize = 3000000; state.trophies += 1; }
+        else if (score > 150) { rank = 'A (準優勝)'; prize = 1500000; }
+
+        state.money += prize;
+        alert(`🏆【第${Math.floor(state.day/30)}回 カフェグランプリ結果発表】\n\nあなたの店舗ランク: ${rank}\n獲得賞金: ${prize.toLocaleString()}円！`);
+        addNews(`【グランプリ】第${Math.floor(state.day/30)}回大会で評価ランク「${rank}」を獲得！`);
+    }
+
     function renderHeader() {
         document.getElementById('money').innerText = state.money.toLocaleString();
         document.getElementById('reputation').innerText = state.reputation.toLocaleString();
+        document.getElementById('branch-count').innerText = state.branches.filter(b => b.unlocked).length;
         document.getElementById('staff-count').innerText = state.staff.partTime + state.staff.fullTime;
         document.getElementById('time-display').innerText = `Day ${state.day} - ${String(state.hour).padStart(2, '0')}:00`;
         document.getElementById('weather-display').innerText = state.weather;
         document.getElementById('buzz-display').innerText = Math.round(state.buzzMultiplier * 100) + '%';
     }
 
-    /* ---- メイン描画コントロール ---- */
     function render() {
         renderHeader();
         const view = document.getElementById('viewport');
@@ -534,15 +611,15 @@
         if (!state.hasShop) {
             document.getElementById('nav-tabs').style.display = 'none';
             view.innerHTML = `
-                <div class="card" style="text-align:center; padding:18px 12px; background:linear-gradient(135deg, #fff, #fbe9e7);">
-                    <div style="font-size:2.8rem; margin-bottom:4px;">☕</div>
-                    <h2 style="font-size:1.1rem; color:var(--accent-brown);">カフェ開業シミュレーション</h2>
-                    <p style="font-size:0.75rem; color:var(--text-sub); margin-top:4px;">開業資金 3,000,000円<br>固定費（家賃・光熱費 20,000円/日）が発生します。</p>
+                <div class="card" style="text-align:center; padding:20px 12px; background:linear-gradient(135deg, #fff, #efebe9);">
+                    <div style="font-size:3rem; margin-bottom:4px;">☕</div>
+                    <h2 style="font-size:1.15rem; color:var(--accent-brown);">カフェ経営 Grand Master Pro</h2>
+                    <p style="font-size:0.75rem; color:var(--text-sub); margin-top:6px;">開業資金 3,000,000円を手に、地域No.1のカフェチェーンを目指そう！</p>
                 </div>
                 <div class="card">
-                    <div style="font-weight:bold; font-size:0.95rem;">☕ 本格ハンドドリップカフェ</div>
-                    <div style="font-size:0.75rem; color:var(--text-sub); margin:4px 0;">自分で豆を研磨して淹れる本格重視のカフェ。</div>
-                    <button class="action-btn" onclick="startShop('自家焙煎珈琲店')">1,000,000円で出店</button>
+                    <div style="font-weight:bold; font-size:0.95rem; color:var(--accent-brown);">🏪 本格ハンドドリップカフェ 本店</div>
+                    <div style="font-size:0.75rem; color:var(--text-sub); margin:6px 0;">自分の手でコーヒーを淹れるこだわり重視のカフェ。</div>
+                    <button class="action-btn" onclick="startShop('自家焙煎珈琲 本店')">1,000,000円で開店する</button>
                 </div>
             `;
             return;
@@ -553,35 +630,40 @@
 
         if (state.currentTab === 'floor') renderFloorMap(view);
         if (state.currentTab === 'brew') renderBrewMinigame(view);
+        if (state.currentTab === 'recipe') renderRecipeCreation(view);
+        if (state.currentTab === 'decor') renderDecorCustomization(view);
         if (state.currentTab === 'kitchen') renderKitchen(view);
+        if (state.currentTab === 'expand') renderExpansion(view);
         if (state.currentTab === 'phone') renderPhone(view);
-        if (state.currentTab === 'staff') renderStaff(view);
         if (state.currentTab === 'report') renderReport(view);
     }
 
-    /* 🏪 店内様子 */
     function renderFloorMap(view) {
+        let styleClass = `map-style-${state.decor.style}`;
         let html = `
             <div class="card">
-                <div class="card-title">🏪 店内ライブマップ</div>
-                <div class="cafe-map">
-                    <div class="zone-title">🍳 カウンター・厨房</div>
+                <div class="card-title">
+                    <span>🏪 店内ライブビュー (${state.decor.style.toUpperCase()})</span>
+                    <span class="badge">🏆 トロフィー: ${state.trophies}</span>
+                </div>
+                <div class="cafe-map ${styleClass}">
+                    <div class="zone-title">🍳 厨房・カウンター [観葉植物: ${state.decor.plant}]</div>
                     <div class="kitchen-area">
-                        <span>👨‍🍳 スタッフ: ${state.staff.partTime + state.staff.fullTime + 1}名</span>
+                        <span>👨‍🍳 スッタフ: ${state.staff.partTime + state.staff.fullTime + 1}名</span>
                         <span>☕ 完成在庫: ${state.recipes[0].stock}杯</span>
                     </div>
-                    <div class="zone-title">🪑 フロア客席</div>
+                    <div class="zone-title">🪑 客席フロア [席タイプ: ${state.decor.tableType}]</div>
                     <div class="seating-area">
         `;
 
         state.tables.forEach(t => {
             let content = '';
             if (!t.occupied) {
-                content = `<div style="font-size:0.7rem; color:#8d6e63;">空席</div><div style="font-size:1.4rem; opacity:0.3;">🪑</div>`;
+                content = `<div style="font-size:0.68rem; color:#8d6e63;">空席</div><div style="font-size:1.3rem; opacity:0.35;">🪑</div>`;
             } else if (t.state === 'waiting') {
-                content = `<div class="speech-bubble">💭 注文中...</div><div style="font-size:1.6rem;">${t.customer}</div>`;
+                content = `<div class="speech-bubble">💭 ${t.item.name} 注文</div><div style="font-size:1.5rem;">${t.customer}</div>`;
             } else if (t.state === 'eating') {
-                content = `<div class="speech-bubble">😋 ${t.item.icon} 美味しい</div><div style="font-size:1.6rem;">${t.customer}</div>`;
+                content = `<div class="speech-bubble">😋 ${t.item.icon} 最高！</div><div style="font-size:1.5rem;">${t.customer}</div>`;
             }
             html += `<div class="table-node">${content}</div>`;
         });
@@ -590,38 +672,37 @@
         view.innerHTML = html;
     }
 
-    /* ☕ 手作業でコーヒーを作る機能 (ミニゲーム) */
     function renderBrewMinigame(view) {
         const canBrew = state.ingredients.beans > 0;
 
         let stepText = '';
         let buttonText = '';
         if (state.brewStep === 0) {
-            stepText = '① 珈琲豆をミルで均一に研磨します';
-            buttonText = '1. 豆を手動研磨する（豆在庫-1）';
+            stepText = '① 珈琲豆をミルで均一に挽く';
+            buttonText = '1. 豆を手作業で挽く (豆在庫 -1)';
         } else if (state.brewStep === 1) {
-            stepText = '② お湯を少し注ぎ、20秒間しっかり蒸らします';
+            stepText = '② お湯を少し注いで20秒間蒸らす';
             buttonText = '2. お湯を注いで蒸らす';
         } else if (state.brewStep === 2) {
-            stepText = '③ 丁寧に円を描くようにドリップ抽出します';
-            buttonText = '3. ドリップしてコーヒーを抽出完了！';
+            stepText = '③ 丁寧に円を描きながら抽出する';
+            buttonText = '3. ドリップしてブレンド完成！';
         }
 
         view.innerHTML = `
             <div class="card">
-                <div class="card-title">☕ 手作業コーヒー抽出</div>
-                <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">
-                    1工程ずつ丁寧に仕込むことで美味しいコーヒー（店舗在庫）を完成させます。<br>
+                <div class="card-title">☕ 手動ドリップ抽出</div>
+                <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">
+                    1工程ずつタップして高品質なブレンドコーヒーを作ります。<br>
                     <strong>珈琲豆在庫: ${state.ingredients.beans} 個</strong>
                 </p>
 
                 <div class="brew-box">
-                    <div style="font-size:2.2rem; margin-bottom:4px;">
+                    <div style="font-size:2.5rem; margin-bottom:4px;">
                         ${state.brewStep === 0 ? '🫘' : state.brewStep === 1 ? '🫖' : '☕'}
                     </div>
-                    <div class="brew-step">${stepText}</div>
+                    <div style="font-size:0.85rem; font-weight:bold; color:var(--accent-amber); margin-bottom:8px;">${stepText}</div>
                     <button class="action-btn" ${!canBrew && state.brewStep === 0 ? 'disabled' : ''} onclick="advanceBrewStep()">
-                        ${!canBrew && state.brewStep === 0 ? '珈琲豆がありません（仕入れが必要）' : buttonText}
+                        ${!canBrew && state.brewStep === 0 ? '珈琲豆が不足しています' : buttonText}
                     </button>
                 </div>
             </div>
@@ -630,16 +711,13 @@
 
     function advanceBrewStep() {
         if (state.brewStep === 0) {
-            if (state.ingredients.beans <= 0) {
-                alert('珈琲豆の在庫がありません！仕入れを行ってください。');
-                return;
-            }
+            if (state.ingredients.beans <= 0) return alert('珈琲豆が足りません！');
             state.ingredients.beans -= 1;
             state.brewStep = 1;
             showFloatText('ゴリゴリ... 豆を挽きました');
         } else if (state.brewStep === 1) {
             state.brewStep = 2;
-            showFloatText('ふわぁ... じっくり蒸らし中');
+            showFloatText('ふわぁ... 蒸らし中');
         } else if (state.brewStep === 2) {
             state.brewStep = 0;
             state.recipes[0].stock += 1;
@@ -648,22 +726,141 @@
         render();
     }
 
-    /* 📦 原材料仕入れ (仕入れ必須制限) */
+    function renderRecipeCreation(view) {
+        let menuList = state.recipes.map(r => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#fafafa; padding:6px 8px; border-radius:6px; margin-bottom:4px; border:1px solid #eee;">
+                <span>${r.icon} <strong>${r.name}</strong> (${r.price}円) ${r.isWeatherLimited ? `<span class="badge">天候:${r.weatherReq}</span>` : ''}</span>
+                <span style="font-size:0.75rem; color:var(--text-sub);">完成在庫: ${r.stock}</span>
+            </div>
+        `).join('');
+
+        view.innerHTML = `
+            <div class="card">
+                <div class="card-title">🧪 オリジナルシグネチャーコーヒー調合</div>
+                <div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">
+                    豆の種類、焙煎度、抽出方法を調合して新メニューを開発します。（開発費: 100,000円）
+                </div>
+
+                <label style="font-size:0.75rem; font-weight:bold;">メニュー名:</label>
+                <input type="text" id="custom-name" placeholder="例: 極上スペシャリティラテ">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+                    <div>
+                        <label style="font-size:0.7rem; font-weight:bold;">🫘 豆の種類</label>
+                        <select id="select-bean">
+                            <option value="アラビカ">アラビカ種 (+魅力5)</option>
+                            <option value="ロブスタ">ロブスタ種 (+魅力3)</option>
+                            <option value="スペシャルティ">スペシャルティ (+魅力12)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:0.7rem; font-weight:bold;">🔥 焙煎度</label>
+                        <select id="select-roast">
+                            <option value="浅煎り">浅煎り (華やか)</option>
+                            <option value="中煎り">中煎り (バランス)</option>
+                            <option value="深煎り">深煎り (濃厚)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top:6px;">
+                    <label style="font-size:0.7rem; font-weight:bold;">⚙️ 抽出方法</label>
+                    <select id="select-method">
+                        <option value="ハンドドリップ">ハンドドリップ</option>
+                        <option value="サイフォン">サイフォン</option>
+                        <option value="エスプレッソ">エスプレッソ</option>
+                    </select>
+                </div>
+
+                <button class="action-btn" onclick="createCustomRecipe()">100,000円で開発・登録</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 現在の提供メニュー一覧</div>
+                ${menuList}
+            </div>
+        `;
+    }
+
+    function createCustomRecipe() {
+        const name = document.getElementById('custom-name').value.trim();
+        if (!name) return alert('メニュー名を入力してください。');
+        if (state.money < 100000) return alert('開発資金（10万円）が足りません！');
+
+        const bean = document.getElementById('select-bean').value;
+        const roast = document.getElementById('select-roast').value;
+        const method = document.getElementById('select-method').value;
+
+        let charm = 10;
+        if (bean === 'スペシャルティ') charm += 10;
+
+        state.money -= 100000;
+        state.recipes.push({
+            id: 'custom_' + Date.now(),
+            name: `${name} (${roast})`,
+            icon: method === 'エスプレッソ' ? '☕' : '🧪',
+            ingKey: 'beans',
+            price: 850,
+            stock: 3,
+            charm: charm,
+            isWeatherLimited: false
+        });
+
+        showFloatText('✨ 新メニューを登録しました！');
+        render();
+    }
+
+    function renderDecorCustomization(view) {
+        view.innerHTML = `
+            <div class="card">
+                <div class="card-title">🎨 店舗リノベーション & インテリア</div>
+                <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">
+                    内装スタイルを変更して店舗の魅力を高めると、集客力（バズ率）が上昇します。
+                </p>
+
+                <div style="display:flex; flex-direction:column; gap:8px; font-size:0.8rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f5f5f5; padding:6px; border-radius:6px;">
+                        <span>🕰️ レトロ純喫茶風 (50万円)<br><small style="color:green;">集客力 +20%</small></span>
+                        <button class="action-btn btn-small" onclick="applyDecor('retro', 500000)">リノベ</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f5f5f5; padding:6px; border-radius:6px;">
+                        <span>✨ スタイリッシュモダン (100万円)<br><small style="color:green;">集客力 +40%</small></span>
+                        <button class="action-btn btn-small" onclick="applyDecor('modern', 1000000)">リノベ</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#f5f5f5; padding:6px; border-radius:6px;">
+                        <span>🌿 オーガニックナチュラル (80万円)<br><small style="color:green;">集客力 +30%</small></span>
+                        <button class="action-btn btn-small" onclick="applyDecor('natural', 800000)">リノベ</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function applyDecor(style, cost) {
+        if (state.money < cost) return alert('資金が不足しています！');
+        state.money -= cost;
+        state.decor.style = style;
+
+        if (style === 'retro') { state.buzzMultiplier = 1.2; state.decor.tableType = '重厚な革張りソファー'; state.decor.plant = 'カポック'; }
+        if (style === 'modern') { state.buzzMultiplier = 1.4; state.decor.tableType = 'ガラス製ハイテーブル'; state.decor.plant = 'モンステラ'; }
+        if (style === 'natural') { state.buzzMultiplier = 1.3; state.decor.tableType = '無垢材木製デスク'; state.decor.plant = '大きなパキラ'; }
+
+        showFloatText('🎨 内装のリノベーション完了！');
+        render();
+    }
+
     function renderKitchen(view) {
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">📦 原材料仕入れ所</div>
-                <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:10px;">
-                    ※在庫がない場合、コーヒーや商品の提供が一切できなくなります。
-                </p>
-                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:10px;">
+                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🫘 珈琲豆 (20個分): 2,000円<br><small style="color:var(--text-sub);">現在庫: ${state.ingredients.beans}</small></span>
-                        <button class="action-btn" style="width: auto; padding: 6px 12px;" onclick="buyIng('beans', 2000, 20)">購入</button>
+                        <span>🫘 珈琲豆 (25個分): 2,500円<br><small style="color:var(--text-sub);">現在庫: ${state.ingredients.beans}</small></span>
+                        <button class="action-btn btn-small" onclick="buyIng('beans', 2500, 25)">仕入れ</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🥛 特選牛乳 (15個分): 2,000円<br><small style="color:var(--text-sub);">現在庫: ${state.ingredients.milk}</small></span>
-                        <button class="action-btn" style="width: auto; padding: 6px 12px;" onclick="buyIng('milk', 2000, 15)">購入</button>
+                        <span>🥛 新鮮ミルク (10個分): 1,500円<br><small style="color:var(--text-sub);">現在庫: ${state.ingredients.milk}</small></span>
+                        <button class="action-btn btn-small" onclick="buyIng('milk', 1500, 10)">仕入れ</button>
                     </div>
                 </div>
             </div>
@@ -675,21 +872,51 @@
             state.money -= cost;
             state.totalCost += cost;
             state.ingredients[key] += amount;
-            showFloatText(`材料入荷 +${amount}`);
+            showFloatText(`在庫追加 +${amount}`);
             render();
         } else {
-            alert('資金が不足しています！');
+            alert('資金が足せません！');
         }
     }
 
-    /* 📱 携帯（ama news, Message, ama mail, その他100+アプリ） */
+    function renderExpansion(view) {
+        let branchList = state.branches.map(b => `
+            <div style="background:#fafafa; padding:8px; border-radius:6px; margin-bottom:6px; border:1px solid #ddd; font-size:0.8rem;">
+                <strong>🏬 ${b.name}</strong> ${b.unlocked ? '<span class="badge" style="background:green; color:#fff;">営業中</span>' : ''}<br>
+                <small style="color:var(--text-sub);">固定家賃: ${b.rent.toLocaleString()}円/日</small>
+            </div>
+        `).join('');
+
+        view.innerHTML = `
+            <div class="card">
+                <div class="card-title">🏬 多店舗チェーン展開</div>
+                <p style="font-size:0.75rem; color:var(--text-sub); margin-bottom:8px;">
+                    新店舗を出店して売上規模を拡大しよう！
+                </p>
+                ${branchList}
+                <button class="action-btn" onclick="unlockBranch('2号店 (駅前店)', 2000000, 30000)">2号店 (駅前店) を出店 (200万円)</button>
+                <button class="action-btn" style="margin-top:4px;" onclick="unlockBranch('3号店 (大型モール店)', 5000000, 60000)">3号店 (モール店) を出店 (500万円)</button>
+            </div>
+        `;
+    }
+
+    function unlockBranch(name, cost, rent) {
+        if (state.money < cost) return alert('出店資金が足りません！');
+        if (state.branches.some(b => b.name === name)) return alert('すでに出店済みです。');
+
+        state.money -= cost;
+        state.branches.push({ id: Date.now(), name, unlocked: true, rent, level: 1 });
+        showFloatText(`🎉 ${name} をグランドオープン！`);
+        render();
+    }
+
     function renderPhone(view) {
         const shell = document.createElement('div');
         shell.className = 'phone-shell';
 
         if (state.phoneApp === 'home') {
             let appsHtml = `
-                <div class="phone-header"><span>12:00</span><span>ama OS</span><span>🔋 99%</span></div>
+                <div class="phone-header"><span>12:00</span><span>ama OS Pro</span><span>🔋 100%</span></div>
                 <div class="app-grid">
                     <div class="app-icon" onclick="openPhoneApp('news')">
                         <div class="app-badge" style="background:#e53935;">📰</div>
@@ -705,13 +932,13 @@
                     </div>
             `;
 
-            // その他100+アプリアイコンの動的生成
-            const dummyAppIcons = ['📷', '🎨', '🎮', '🎵', 'マップ', '電卓', '時計', 'メモ', '設定', '天気', '辞書', '翻訳', '株価', 'フィットネス', '健康', '本', '動画', 'ラジオ', 'ポッドキャスト', 'ファイル', 'クラウド', 'ウォレット', 'パス', '連絡先', 'カレンダー', 'リマインダー', 'ショートカット', 'ボイスメモ', 'コンパス', '計測', '提示版', 'ショッピング', 'タクシー', '出前', '銀行', 'カード', 'フリマ', 'レシピ', '旅行', 'ホテル', 'フライト', '漫画', 'アニメ', '映画', '音楽', 'ピアノ', 'ギター', '絵の具', '写真', '加工', 'スキャン', 'QRコード', 'セキュリティ', 'クリーナー', '高速化', 'VPN', 'ブラウザ', '検索', '掲示板', '翻訳2', 'コード', 'AI対話', 'デザイン', '3D模型', 'AR計測', '星空', '潮汐', '防災', '緊急', '育児', 'ペット', '家計簿', 'タスク', '習慣', '瞑想', '睡眠', 'ラジオ2', 'カラオケ', 'ニュース2', 'スポーツ', '競馬', '麻雀', '将棋', '囲碁', 'オセロ', 'パズル', 'RPG', 'アクション', 'シミュ', 'クイズ', 'ワード', '電卓2', '単位変換', 'タイムゾーン', '世界時計', 'メモ2', 'ノート', 'PDF', '印刷', 'リモコン'];
+            // 100+ ダミーアプリ生成
+            const dummyAppIcons = ['📷', '🎨', '🎮', '🎵', 'マップ', '電卓', '時計', 'メモ', '設定', '天気', '辞書', '株価', '健康', '本', '動画', 'ファイル', 'ウォレット', 'カレンダー', 'ショートカット', 'ボイスメモ', 'コンパス', 'タクシー', '出前', '銀行', 'フリマ', 'レシピ', '旅行', '漫画', 'アニメ', '映画', '音楽', 'ピアノ', '写真', 'QRコード', 'セキュリティ', 'ブラウザ', 'AI対話', 'デザイン', '防災', '習慣', '瞑想', 'カラオケ', '競馬', '麻雀', '将棋', 'パズル', 'RPG', 'クイズ', 'PDF', 'リモコン'];
 
             dummyAppIcons.forEach((icon, idx) => {
                 appsHtml += `
-                    <div class="app-icon" onclick="alert('アプリ「${icon} App ${idx+1}」は現在メンテナンス中です。')">
-                        <div class="app-badge" style="background:hsl(${(idx * 17) % 360}, 60%, 50%);">${icon}</div>
+                    <div class="app-icon" onclick="alert('アプリ「${icon} App ${idx+1}」を起動しました。')">
+                        <div class="app-badge" style="background:hsl(${(idx * 19) % 360}, 60%, 48%);">${icon}</div>
                         <span>App ${idx+1}</span>
                     </div>
                 `;
@@ -721,29 +948,29 @@
             shell.innerHTML = appsHtml;
 
         } else if (state.phoneApp === 'news') {
-            let newsList = state.news.map(n => `<div style="background:#fff; padding:8px; border-radius:6px; margin-bottom:6px; border:1px solid #ddd;"><strong>${n.time}</strong><br>${n.text}</div>`).join('');
+            let newsList = state.news.map(n => `<div style="background:#fff; padding:6px 8px; border-radius:6px; margin-bottom:6px; border:1px solid #ddd; font-size:0.75rem;"><strong>${n.time}</strong><br>${n.text}</div>`).join('');
             shell.innerHTML = `
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <strong style="color:#fff;">📰 ama news</strong>
-                    <button onclick="openPhoneApp('home')" style="padding:2px 8px;">ホームへ</button>
+                    <strong style="color:#fff; font-size:0.85rem;">📰 ama news</strong>
+                    <button onclick="openPhoneApp('home')" style="padding:2px 8px; font-size:0.7rem;">ホームへ</button>
                 </div>
                 <div class="phone-app-view">${newsList}</div>
             `;
         } else if (state.phoneApp === 'message') {
-            let msgList = state.messages.map(m => `<div style="background:#e1f5fe; padding:8px; border-radius:6px; margin-bottom:6px; color:#01579b;"><strong>${m.sender}:</strong><br>${m.text}</div>`).join('');
+            let msgList = state.messages.map(m => `<div style="background:#e1f5fe; padding:6px 8px; border-radius:6px; margin-bottom:6px; color:#01579b; font-size:0.75rem;"><strong>${m.sender}:</strong><br>${m.text}</div>`).join('');
             shell.innerHTML = `
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <strong style="color:#fff;">💬 Message</strong>
-                    <button onclick="openPhoneApp('home')" style="padding:2px 8px;">ホームへ</button>
+                    <strong style="color:#fff; font-size:0.85rem;">💬 Message</strong>
+                    <button onclick="openPhoneApp('home')" style="padding:2px 8px; font-size:0.7rem;">ホームへ</button>
                 </div>
                 <div class="phone-app-view">${msgList}</div>
             `;
         } else if (state.phoneApp === 'mail') {
-            let mailList = state.mails.map(m => `<div style="background:#fff; padding:8px; border-radius:6px; margin-bottom:6px; border:1px solid #ccc;"><strong>${m.subject}</strong><br><small>${m.from}</small><p style="margin-top:4px;">${m.body}</p></div>`).join('');
+            let mailList = state.mails.map(m => `<div style="background:#fff; padding:6px 8px; border-radius:6px; margin-bottom:6px; border:1px solid #ccc; font-size:0.75rem;"><strong>${m.subject}</strong><br><small style="color:#666;">${m.from}</small><p style="margin-top:4px;">${m.body}</p></div>`).join('');
             shell.innerHTML = `
                 <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                    <strong style="color:#fff;">📧 ama mail</strong>
-                    <button onclick="openPhoneApp('home')" style="padding:2px 8px;">ホームへ</button>
+                    <strong style="color:#fff; font-size:0.85rem;">📧 ama mail</strong>
+                    <button onclick="openPhoneApp('home')" style="padding:2px 8px; font-size:0.7rem;">ホームへ</button>
                 </div>
                 <div class="phone-app-view">${mailList}</div>
             `;
@@ -761,46 +988,29 @@
         state.news.unshift({ time: `Day ${state.day}`, text });
     }
 
-    /* 👥 人事 */
-    function renderStaff(view) {
+    function addMessage(sender, text) {
+        state.messages.unshift({ sender, text });
+    }
+
+    function renderReport(view) {
         view.innerHTML = `
             <div class="card">
-                <div class="card-title">👥 スタッフ雇用</div>
-                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🙋‍♂️ アルバイト: ${state.staff.partTime}名 (日給 9,600円)</span>
-                        <button class="action-btn" style="width:auto;" onclick="hireStaff('partTime', 30000)">採用 (3万円)</button>
+                <div class="card-title">📊 損益計算書 (P&L レポート)</div>
+                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:flex; justify-content:space-between;"><span>💵 総売上高:</span><strong style="color:green;">+${state.totalRevenue.toLocaleString()}円</strong></div>
+                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>📦 仕入れ費:</span><span>-${state.totalCost.toLocaleString()}円</span></div>
+                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>🏠 固定家賃・光熱費:</span><span>-${state.totalFixedCostPaid.toLocaleString()}円</span></div>
+                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>👥 人件費累計:</span><span>-${state.totalLaborCost.toLocaleString()}円</span></div>
+                    <hr style="border:none; border-top:1px solid #ccc; margin:4px 0;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>📈 純利益:</span>
+                        <span>${(state.totalRevenue - state.totalCost - state.totalFixedCostPaid - state.totalLaborCost).toLocaleString()}円</span>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    function hireStaff(type, fee) {
-        if (state.money >= fee) {
-            state.money -= fee;
-            state.staff[type] += 1;
-            showFloatText('スタッフを採用しました！');
-            render();
-        }
-    }
-
-    /* 📊 経営レポート & 固定費表示 */
-    function renderReport(view) {
-        view.innerHTML = `
-            <div class="card">
-                <div class="card-title">📊 収支レポート</div>
-                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
-                    <div style="display:flex; justify-content:space-between;"><span>💵 総売上:</span><strong>+${state.totalRevenue.toLocaleString()}円</strong></div>
-                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>📦 仕入れ費:</span><span>-${state.totalCost.toLocaleString()}円</span></div>
-                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>🏠 固定費累計（家賃・光熱費）:</span><span>-${state.totalFixedCostPaid.toLocaleString()}円</span></div>
-                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>👥 人件費累計:</span><span>-${state.totalLaborCost.toLocaleString()}円</span></div>
-                </div>
-            </div>
-        `;
-    }
-
-    /* 出店・お客様ロジック */
     function startShop(name) {
         if (state.money >= 1000000) {
             state.money -= 1000000;
@@ -815,17 +1025,79 @@
         const emptyTable = state.tables.find(t => !t.occupied);
         if (!emptyTable) return;
 
-        // 手作業で淹れたコーヒー（または在庫）が存在すること
-        const target = state.recipes[0];
-        if (target.stock <= 0) return; // 完成在庫がないと来店不可
+        // 利用可能なレシピを抽出
+        const availableRecipes = state.recipes.filter(r => {
+            if (r.stock <= 0) return false;
+            if (r.isWeatherLimited && r.weatherReq !== state.weather) return false;
+            return true;
+        });
 
-        if (Math.random() < 0.5) {
-            target.stock -= 1;
+        if (availableRecipes.length === 0) return;
+
+        // 集客率に基づいた来店確率
+        if (Math.random() < (0.45 * state.buzzMultiplier)) {
+            const recipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+            recipe.stock -= 1;
+
             emptyTable.occupied = true;
             emptyTable.customer = CUSTOMER_AVATARS[Math.floor(Math.random() * CUSTOMER_AVATARS.length)];
-            emptyTable.item = target;
+            emptyTable.item = recipe;
             emptyTable.state = 'waiting';
             emptyTable.timer = 2;
 
-            state.money += target.price;
-            state.total
+            // 各店舗からの売上加算
+            const totalBranchBonus = state.branches.filter(b => b.unlocked).length;
+            const earned = recipe.price * totalBranchBonus;
+
+            state.money += earned;
+            state.totalRevenue += earned;
+            state.reputation += recipe.charm;
+            showFloatText(`+${earned.toLocaleString()}円`);
+
+            renderHeader();
+            if (state.currentTab === 'floor') renderFloorMap(document.getElementById('viewport'));
+        }
+    }
+
+    function updateSeats() {
+        let changed = false;
+        state.tables.forEach(t => {
+            if (t.occupied) {
+                t.timer--;
+                if (t.state === 'waiting' && t.timer <= 0) {
+                    t.state = 'eating';
+                    t.timer = 4;
+                    changed = true;
+                } else if (t.state === 'eating' && t.timer <= 0) {
+                    t.occupied = false;
+                    t.customer = null;
+                    t.state = 'empty';
+                    changed = true;
+                }
+            }
+        });
+        if (changed && state.currentTab === 'floor') renderFloorMap(document.getElementById('viewport'));
+    }
+
+    function switchTab(t) {
+        state.currentTab = t;
+        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+        const activeBtn = document.getElementById(`tab-${t}`);
+        if (activeBtn) activeBtn.classList.add('active');
+        render();
+    }
+
+    function showFloatText(txt) {
+        const el = document.createElement('div');
+        el.className = 'float-text';
+        el.innerText = txt;
+        el.style.left = '50%';
+        el.style.top = '35%';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 850);
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
