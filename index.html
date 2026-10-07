@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>マスター・オブ・カフェ - 本格カフェ経営シミュレーション</title>
+    <title>マスター・オブ・カフェ PREMIUM - 本格カフェ経営シミュレーション</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
 
         :root {
-            --bg-brown: #2d1e18;
-            --panel-brown: #3d2b22;
-            --accent-gold: #d4a359;
-            --warm-bg: #f8f4ee;
-            --text-dark: #221815;
+            --bg-brown: #241712;
+            --panel-brown: #332119;
+            --accent-gold: #e5a93c;
+            --warm-bg: #f9f5f0;
+            --text-dark: #1f1512;
         }
 
         body {
@@ -23,110 +23,103 @@
             touch-action: manipulation;
         }
 
-        /* 木目調テクスチャ背景のアクセント */
         .wood-pattern {
-            background-color: #38251d;
-            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 10px);
+            background-color: #2e1d16;
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 10px);
         }
 
         .custom-scroll::-webkit-scrollbar {
             width: 6px;
         }
         .custom-scroll::-webkit-scrollbar-track {
-            background: #231612;
+            background: #1b110d;
         }
         .custom-scroll::-webkit-scrollbar-thumb {
-            background: #8c5a3c;
+            background: #7a4f33;
             border-radius: 3px;
         }
 
         .tab-btn.active {
-            background-color: #d4a359;
-            color: #221815;
-            font-weight: bold;
-            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+            background-color: #e5a93c;
+            color: #1a100c;
+            font-weight: 900;
+            box-shadow: 0 2px 8px rgba(229, 169, 60, 0.4);
         }
 
         .toast-float {
-            animation: floatUp 1.2s ease-out forwards;
+            animation: floatUp 1.4s ease-out forwards;
         }
 
         @keyframes floatUp {
-            0% { opacity: 0; transform: translateY(10px) scale(0.9); }
-            20% { opacity: 1; transform: translateY(0) scale(1); }
-            80% { opacity: 1; transform: translateY(-10px); }
-            100% { opacity: 0; transform: translateY(-25px); }
+            0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+            18% { opacity: 1; transform: translateY(0) scale(1); }
+            82% { opacity: 1; transform: translateY(-8px); }
+            100% { opacity: 0; transform: translateY(-28px); }
         }
 
-        /* アニメーション効果 */
-        .customer-enter {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .progress-bar-inner {
+            transition: width 0.2s linear;
         }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex justify-center items-center select-none">
 
-<div id="game-app" class="w-full max-w-md h-full sm:h-[92vh] sm:max-h-[850px] bg-[#f8f4ee] flex flex-direction flex-col shadow-2xl sm:rounded-2xl overflow-hidden relative border-0 sm:border-4 border-[#52372b]">
+<div id="game-app" class="w-full max-w-md h-full sm:h-[94vh] sm:max-h-[880px] bg-[#f9f5f0] flex flex-col shadow-2xl sm:rounded-2xl overflow-hidden relative border-0 sm:border-4 border-[#472d22]">
     
     <!-- ヘッダー (ステータス表示) -->
-    <header class="wood-pattern text-white px-4 py-3 border-b-2 border-[#d4a359] shrink-0 shadow-md">
-        <div class="flex justify-between items-center mb-1">
+    <header class="wood-pattern text-white px-4 py-3 border-b-2 border-[#e5a93c] shrink-0 shadow-lg">
+        <div class="flex justify-between items-center mb-1.5">
             <div class="flex items-center gap-2">
-                <span class="text-xl" id="shop-icon">☕</span>
-                <h1 id="shop-title" class="font-bold text-base text-[#f3e5d8] truncate max-w-[160px]">カフェ開業手引き</h1>
+                <span class="text-2xl" id="shop-icon">☕</span>
+                <div>
+                    <h1 id="shop-title" class="font-bold text-sm text-[#f5e6d3] truncate max-w-[150px]">マスター・カフェ</h1>
+                    <div class="text-[10px] text-amber-300/80 font-bold" id="shop-location-name">物件未契約</div>
+                </div>
             </div>
-            <div class="bg-[#1e130e] px-2.5 py-1 rounded-full text-xs text-[#d4a359] border border-[#d4a359]/30 font-bold">
-                📅 <span id="days-count">1</span>日目 (<span id="time-display">09:00</span>)
+            <div class="bg-[#170e0a] px-3 py-1 rounded-full text-xs text-[#e5a93c] border border-[#e5a93c]/40 font-bold flex items-center gap-1.5">
+                <span>📅</span><span id="days-count">1</span>日目 (<span id="time-display">09:00</span>)
             </div>
         </div>
         
-        <div class="grid grid-cols-2 gap-2 mt-2 bg-[#211510]/80 p-2 rounded-xl border border-[#4a3227]">
-            <div class="flex items-center gap-1.5">
-                <span class="text-lg">💰</span>
+        <div class="grid grid-cols-2 gap-2 mt-1 bg-[#1c110c]/85 p-2 rounded-xl border border-[#4d3226]">
+            <div class="flex items-center gap-2 px-1">
+                <span class="text-xl">💰</span>
                 <div>
-                    <div class="text-[10px] text-gray-300 font-bold uppercase tracking-wider">資金</div>
+                    <div class="text-[9px] text-gray-300 font-bold uppercase tracking-wider">資金 (残高)</div>
                     <div class="text-sm font-black text-emerald-400 font-mono"><span id="stat-money">3,000,000</span>円</div>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <span class="text-lg">⭐</span>
+            <div class="flex items-center gap-2 px-1 border-l border-[#3a251b]">
+                <span class="text-xl">⭐</span>
                 <div>
-                    <div class="text-[10px] text-gray-300 font-bold uppercase tracking-wider">カフェ評判</div>
-                    <div class="text-sm font-black text-amber-300 font-mono"><span id="stat-rep">0</span> <span class="text-[10px] text-gray-400">pt</span></div>
+                    <div class="text-[9px] text-gray-300 font-bold uppercase tracking-wider">カフェ評判</div>
+                    <div class="text-sm font-black text-amber-300 font-mono"><span id="stat-rep">0</span> <span class="text-[9px] text-gray-400">pt</span></div>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- メイン表示領域 (スクロール) -->
-    <main id="viewport" class="flex-1 overflow-y-auto p-3 space-y-3 custom-scroll bg-[#f4ece1]">
-        <!-- 動的コンテンツがここに入ります -->
+    <!-- メインビュー領域 -->
+    <main id="viewport" class="flex-1 overflow-y-auto p-3 space-y-3 custom-scroll bg-[#f3eae0]">
+        <!-- 動的ビューがここに挿入されます -->
     </main>
 
-    <!-- トースト＆来店ポップアップ領域 -->
-    <div id="toast-container" class="absolute bottom-16 left-0 right-0 pointer-events-none flex flex-col items-center gap-1 z-50"></div>
+    <!-- トースト通知領域 -->
+    <div id="toast-container" class="absolute bottom-16 left-0 right-0 pointer-events-none flex flex-col items-center gap-1.5 z-50 px-4"></div>
 
-    <!-- ナビゲーションタブ -->
-    <nav id="nav-bar" class="wood-pattern border-t-2 border-[#d4a359] grid grid-cols-5 p-1 shrink-0 gap-1" style="display: none;">
-        <button onclick="switchTab('ops')" id="tab-ops" class="tab-btn active flex flex-col items-center py-2 rounded-lg text-white transition-all text-[11px] font-bold">
-            <span class="text-base">☕</span>営業
+    <!-- 4タブ構成ナビゲーション -->
+    <nav id="nav-bar" class="wood-pattern border-t-2 border-[#e5a93c] grid grid-cols-4 p-1.5 shrink-0 gap-1" style="display: none;">
+        <button onclick="switchTab('ops')" id="tab-ops" class="tab-btn active flex flex-col items-center py-2 rounded-xl text-white transition-all text-[11px] font-bold">
+            <span class="text-base mb-0.5">☕</span>仕込み・営業
         </button>
-        <button onclick="switchTab('supply')" id="tab-supply" class="tab-btn flex flex-col items-center py-2 rounded-lg text-white transition-all text-[11px] font-bold">
-            <span class="text-base">📦</span>仕入れ
+        <button onclick="switchTab('equip')" id="tab-equip" class="tab-btn flex flex-col items-center py-2 rounded-xl text-white transition-all text-[11px] font-bold">
+            <span class="text-base mb-0.5">⚙️</span>設備・機材
         </button>
-        <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn flex flex-col items-center py-2 rounded-lg text-white transition-all text-[11px] font-bold">
-            <span class="text-base">📖</span>開発
+        <button onclick="switchTab('menu')" id="tab-menu" class="tab-btn flex flex-col items-center py-2 rounded-xl text-white transition-all text-[11px] font-bold">
+            <span class="text-base mb-0.5">📖</span>レシピ開発
         </button>
-        <button onclick="switchTab('equip')" id="tab-equip" class="tab-btn flex flex-col items-center py-2 rounded-lg text-white transition-all text-[11px] font-bold">
-            <span class="text-base">⚙️</span>機材
-        </button>
-        <button onclick="switchTab('interior')" id="tab-interior" class="tab-btn flex flex-col items-center py-2 rounded-lg text-white transition-all text-[11px] font-bold">
-            <span class="text-base">🛋️</span>内装
+        <button onclick="switchTab('interior')" id="tab-interior" class="tab-btn flex flex-col items-center py-2 rounded-xl text-white transition-all text-[11px] font-bold">
+            <span class="text-base mb-0.5">🛋️</span>店舗改装
         </button>
     </nav>
 </div>
@@ -140,113 +133,217 @@ const gameState = {
     timeHour: 9,
     timeMin: 0,
     currentTab: 'ops',
-    location: null, // 物件選択前
-    
-    // 原料在庫
+    location: null,
+
+    // 仕入れ材料マスター＆在庫
     supplies: {
-        coffeeBeans: 0, // 珈琲豆 (g)
-        milk: 0,        // 高級ミルク (ml)
-        flour: 0,       // 特製粉・小麦粉 (g)
-        fruit: 0,       // フレッシュフルーツ (個)
-        syrup: 0        // 季節のシロップ (ml)
+        coffeeBeans: { name: 'ブレンド珈琲豆', icon: '☕', unit: 'g', pack: 500, price: 1800, count: 0, desc: 'ハウスブレンドのベースとなる芳醇なブレンド豆。' },
+        soBeans: { name: 'シングルオリジン豆', icon: '🫘', unit: 'g', pack: 300, price: 2800, count: 0, desc: 'エスプレッソやこだわりコーヒー用の厳選高級豆。' },
+        dairyMatcha: { name: '特選乳製品＆宇治抹茶', icon: '🥛', unit: '個', pack: 20, price: 2200, count: 0, desc: '濃厚生クリーム・高級牛乳・京都産宇治抹茶のセット。' },
+        bakingBase: { name: '小麦粉・卵・バター資材', icon: '🌾', unit: 'セット', pack: 15, price: 1900, count: 0, desc: 'トーストやパンケーキ、ケーキ生地の万能基材。' },
+        fruitChoco: { name: '新鮮果物＆ショコラ資材', icon: '🍓', unit: 'セット', pack: 10, price: 3200, count: 0, desc: 'パフェや高級ケーキに使用するフレッシュフルーツと濃厚チョコ。' },
+        teaLeaves: { name: 'オーガニック紅茶＆ハーブ', icon: '🫖', unit: 'パック', pack: 30, price: 2100, count: 0, desc: 'アールグレイや各種ハーブティー抽出用の高品質茶葉。' }
     },
 
-    // 厨房設備・機材導入フラグ
+    // 厨房機器・カウンター設備フラグ
     equipment: {
-        pos: false,           // POSレジカウンター
-        drip: false,          // ハンドドリップセット
-        espresso: false,      // エスプレッソマシン
-        grinder: false,       // 高機能グラインダー
-        oven: false           // 高性能オーブン
+        pos: false,       // POSレジカウンター
+        drip: false,      // ハンドドリップセット
+        espresso: false,  // エスプレッソマシン
+        kitchen: false,   // 調理キッチン・フライパン
+        oven: false,      // 高性能プロオーブン
+        parfait: false    // パフェ＆冷菓専用台
     },
 
-    // カフェメニューマスター
+    // カフェメニューマスター (ドリンク/フード/スイーツ)
     recipes: [
+        // --- ドリンク類 ---
         {
-            id: 'hand_drip',
-            name: 'ハンドドリップコーヒー',
+            id: 'house_blend',
+            category: 'drink',
+            categoryName: 'ドリンク',
+            name: '自家焙煎ハウスブレンド',
             icon: '☕',
             reqEquip: 'drip',
             reqIngredients: { coffeeBeans: 18 },
-            baseCost: 90,
+            baseCost: 80,
             stdPrice: 500,
             price: 500,
-            prepTime: 3,
+            prepTime: 3, // 秒
             unlocked: false,
             stock: 0,
-            isPreparing: false
+            isPreparing: false,
+            prepProgress: 0
         },
         {
-            id: 'cafe_latte',
-            name: '極上カフェラテ',
+            id: 'rich_latte',
+            category: 'drink',
+            categoryName: 'ドリンク',
+            name: '濃厚カフェラテ',
             icon: '🥛',
             reqEquip: 'espresso',
-            reqIngredients: { coffeeBeans: 20, milk: 180 },
-            baseCost: 180,
-            stdPrice: 650,
-            price: 650,
+            reqIngredients: { soBeans: 18, dairyMatcha: 1 },
+            baseCost: 210,
+            stdPrice: 680,
+            price: 680,
             prepTime: 4,
             unlocked: false,
             stock: 0,
-            isPreparing: false
+            isPreparing: false,
+            prepProgress: 0
         },
         {
-            id: 'scone',
-            name: '自家製サクサクスコーン',
-            icon: '🥯',
+            id: 'uji_matcha_latte',
+            category: 'drink',
+            categoryName: 'ドリンク',
+            name: '宇治抹茶ラテ',
+            icon: '🍵',
+            reqEquip: 'espresso',
+            reqIngredients: { dairyMatcha: 2 },
+            baseCost: 220,
+            stdPrice: 720,
+            price: 720,
+            prepTime: 4,
+            unlocked: false,
+            stock: 0,
+            isPreparing: false,
+            prepProgress: 0
+        },
+        {
+            id: 'earl_grey',
+            category: 'drink',
+            categoryName: 'ドリンク',
+            name: 'オーガニックアールグレイ',
+            icon: '🫖',
+            reqEquip: 'drip',
+            reqIngredients: { teaLeaves: 1 },
+            baseCost: 70,
+            stdPrice: 550,
+            price: 550,
+            prepTime: 3,
+            unlocked: false,
+            stock: 0,
+            isPreparing: false,
+            prepProgress: 0
+        },
+
+        // --- フード類 ---
+        {
+            id: 'ogura_toast',
+            category: 'food',
+            categoryName: 'フード',
+            name: '厚切り小倉バタートースト',
+            icon: '🍞',
+            reqEquip: 'kitchen',
+            reqIngredients: { bakingBase: 1 },
+            baseCost: 150,
+            stdPrice: 600,
+            price: 600,
+            prepTime: 5,
+            unlocked: false,
+            stock: 0,
+            isPreparing: false,
+            prepProgress: 0
+        },
+        {
+            id: 'souffle_pancake',
+            category: 'food',
+            categoryName: 'フード',
+            name: '特製ふわふわスフレパンケーキ',
+            icon: '🥞',
             reqEquip: 'oven',
-            reqIngredients: { flour: 150, syrup: 20 },
-            baseCost: 140,
-            stdPrice: 480,
-            price: 480,
+            reqIngredients: { bakingBase: 2, dairyMatcha: 1 },
+            baseCost: 320,
+            stdPrice: 1280,
+            price: 1280,
+            prepTime: 7,
+            unlocked: false,
+            stock: 0,
+            isPreparing: false,
+            prepProgress: 0
+        },
+        {
+            id: 'napolitan',
+            category: 'food',
+            categoryName: 'フード',
+            name: 'クラシックナポリタン',
+            icon: '🍝',
+            reqEquip: 'kitchen',
+            reqIngredients: { bakingBase: 1, fruitChoco: 1 },
+            baseCost: 290,
+            stdPrice: 980,
+            price: 980,
             prepTime: 6,
             unlocked: false,
             stock: 0,
-            isPreparing: false
+            isPreparing: false,
+            prepProgress: 0
         },
+
+        // --- スイーツ類 ---
         {
-            id: 'pancake',
-            name: 'ふわふわ極厚パンケーキ',
-            icon: '🥞',
+            id: 'strawberry_cake',
+            category: 'sweets',
+            categoryName: 'スイーツ',
+            name: '濃厚苺ショートケーキ',
+            icon: '🍰',
             reqEquip: 'oven',
-            reqIngredients: { flour: 200, milk: 100, syrup: 30 },
-            baseCost: 260,
-            stdPrice: 1100,
-            price: 1100,
+            reqIngredients: { bakingBase: 1, dairyMatcha: 1, fruitChoco: 1 },
+            baseCost: 380,
+            stdPrice: 850,
+            price: 850,
             prepTime: 8,
             unlocked: false,
             stock: 0,
-            isPreparing: false
+            isPreparing: false,
+            prepProgress: 0
         },
         {
-            id: 'seasonal_parfait',
-            name: '季節の贅沢フルーツパフェ',
+            id: 'matcha_parfait',
+            category: 'sweets',
+            categoryName: 'スイーツ',
+            name: '自家製抹茶パフェ',
             icon: '🍨',
-            reqEquip: 'pos',
-            reqIngredients: { fruit: 2, milk: 150, syrup: 40 },
-            baseCost: 420,
-            stdPrice: 1500,
-            price: 1500,
-            prepTime: 10,
+            reqEquip: 'parfait',
+            reqIngredients: { dairyMatcha: 2, fruitChoco: 1 },
+            baseCost: 410,
+            stdPrice: 1200,
+            price: 1200,
+            prepTime: 7,
             unlocked: false,
             stock: 0,
-            isPreparing: false
+            isPreparing: false,
+            prepProgress: 0
+        },
+        {
+            id: 'terrine_chocolat',
+            category: 'sweets',
+            categoryName: 'スイーツ',
+            name: '贅沢ショコラテリーヌ',
+            icon: '🍫',
+            reqEquip: 'oven',
+            reqIngredients: { bakingBase: 1, fruitChoco: 2 },
+            baseCost: 450,
+            stdPrice: 950,
+            price: 950,
+            prepTime: 9,
+            unlocked: false,
+            stock: 0,
+            isPreparing: false,
+            prepProgress: 0
         }
     ],
 
-    // 店内カスタマイズ・内装
+    // 店舗改装・内装デザイン
     interiors: {
-        jazz: { name: '極上ジャズBGM音響', icon: '🎷', cost: 120000, repBoost: 25, bought: false, desc: '店内にお洒落で落ち着いたジャズ音楽を流します。' },
-        plants: { name: '観葉植物＆ウッドインテリア', icon: '🌿', cost: 85000, repBoost: 15, bought: false, desc: '温かみのある植物と木製家具で居心地UP。' },
-        terrace: { name: '解放感抜群のテラス席', icon: '🪑', cost: 350000, repBoost: 50, bought: false, desc: '晴れた日に人気のテラス席を増設。' },
-        logo: { name: 'オリジナルブランドロゴ制作', icon: '🎨', cost: 150000, repBoost: 30, bought: false, desc: '洗練されたロゴで認知度とブランド力UP。' }
-    },
-
-    // リアルタイム顧客シミュレーション用
-    currentCustomers: []
+        jazz: { name: '極上ジャズBGM＆高級スピーカー', icon: '🎷', cost: 150000, repBoost: 30, bought: false, desc: '心地よいジャズ音響で滞在満足度と評価を高めます。' },
+        plants: { name: '北欧風ウッド家具＆観葉植物', icon: '🌿', cost: 120000, repBoost: 20, bought: false, desc: 'ナチュラルで温かみのある空間で固定ファンを獲得。' },
+        terrace: { name: '開放感あふれるガーデンテラス席', icon: '🪑', cost: 400000, repBoost: 60, bought: false, desc: '晴れた日に大人気のテラス席を増設し客足を大幅UP。' },
+        logo: { name: 'デザイナーズブランドロゴ制作', icon: '🎨', cost: 180000, repBoost: 35, bought: false, desc: 'ブランド価値を高め、SNSでのバズや集客力を強化。' }
+    }
 };
 
-// 物件定義データ
+// 物件選択マスター
 const locationsData = [
     {
         id: 'retro_suburb',
@@ -255,60 +352,59 @@ const locationsData = [
         cost: 1200000,
         traffic: '普通',
         multiplier: 1.0,
-        desc: '静かな住宅街。固定客がつきやすくゆったりとした時間が流れる物件。'
+        desc: '落ち着いた住宅街。常連客がつきやすくマイペースに営める良物件。'
     },
     {
-        name: '駅前モダンスペース',
         id: 'station_modern',
+        name: '駅前モダンタワーモール店',
         icon: '🏙️',
-        cost: 2100000,
+        cost: 2200000,
         traffic: '高い',
-        multiplier: 1.4,
-        desc: '通勤客や学生が行き交う好立地。回転率重視の需要が期待できる。'
+        multiplier: 1.45,
+        desc: '通勤客や買い出し客が行き交う賑やかな好立地。回転率重視。'
     },
     {
-        name: '表参道のおしゃれ路面店',
         id: 'omotesando_luxury',
+        name: '表参道ハイエンド路面ショップ',
         icon: '✨',
-        cost: 2800000,
+        cost: 2900000,
         traffic: '超高い',
-        multiplier: 1.9,
-        desc: 'トレンド感溢れる洗練された街。高めの価格設定でもブランド価値で勝負可能。'
+        multiplier: 1.95,
+        desc: '洗練されたトレンドの発信地。強気の価格設定でもブランド価値で大人気に。'
     }
 ];
 
-// --- 初期化処理 ---
 window.onload = function() {
     renderView();
-    // 経営時間のタイマーループ (1.5秒ごとに10分進む)
+    // 1.5秒ごとに10分進むメインタイマーループ
     setInterval(gameTick, 1500);
 };
 
 function gameTick() {
-    if (!gameState.location) return; // 物件契約前は停止
+    if (!gameState.location) return;
 
-    // 時間の経過
+    // 時間経過
     gameState.timeMin += 10;
     if (gameState.timeMin >= 60) {
         gameState.timeMin = 0;
         gameState.timeHour++;
     }
 
-    if (gameState.timeHour >= 21) { // 21時閉店、翌日9時へ
+    if (gameState.timeHour >= 21) {
         gameState.timeHour = 9;
         gameState.day++;
-        showToast("🌙 本日の営業を終了しました。翌日がスタートします！");
+        showToast("🌙 本日の営業を終了しました。翌日がスタートします！", "text-[#f5e6d3] bg-[#2e1d16]");
     }
 
-    // 客の自動来店チェック
+    // 客の自動来店と判定
     simulateCustomerArrival();
 
-    // 画面が営業タブなら部分更新
+    // 営業タブ表示中のダイナミック更新
     if (gameState.currentTab === 'ops') {
-        updateOpsViewDynamic();
+        updateOpsMenuList();
     }
 
-    // ステータス表示の更新
+    // ヘッダーUI更新
     document.getElementById('days-count').innerText = gameState.day;
     document.getElementById('time-display').innerText = 
         `${String(gameState.timeHour).padStart(2,'0')}:${String(gameState.timeMin).padStart(2,'0')}`;
@@ -316,49 +412,41 @@ function gameTick() {
     document.getElementById('stat-rep').innerText = gameState.reputation;
 }
 
-// --- 来店＆需要・価格弾力性シミュレーション ---
+// 価格弾力性による来店＆購入シミュレーション
 function simulateCustomerArrival() {
-    if (!gameState.equipment.pos) return; // レジが無いと営業できない
+    if (!gameState.equipment.pos) return;
 
-    // 提供可能メニュー（解放済み＆仕込み在庫があるもの）
-    const availableMenu = gameState.recipes.filter(r => r.unlocked && r.stock > 0);
-    if (availableMenu.length === 0) return;
+    // 販売可能メニュー（開発済みかつ在庫があるもの）
+    const available = gameState.recipes.filter(r => r.unlocked && r.stock > 0);
+    if (available.length === 0) return;
 
-    // 立地補正 ＋ 評判補正
-    const baseChance = 0.3 * gameState.location.multiplier + (gameState.reputation * 0.005);
-    if (Math.random() > baseChance) return; // 今回の時刻は来店なし
+    // 来店確率計算
+    const baseChance = 0.35 * gameState.location.multiplier + (gameState.reputation * 0.004);
+    if (Math.random() > baseChance) return;
 
-    // ランダムに購入検討メニューを選択
-    const item = availableMenu[Math.floor(Math.random() * availableMenu.length)];
+    // 購入検討商品をランダム決定
+    const item = available[Math.floor(Math.random() * available.length)];
 
-    // 【ダイナミックな価格弾力性シミュレーション】
-    // 価格倍率 = 設定価格 / 相場価格
+    // 価格弾力性計算
     const ratio = item.price / item.stdPrice;
-    let purchaseProbability = 0.7; // 標準確率
+    let buyProb = 0.72;
 
     if (ratio > 1.0) {
-        // 相場より高い場合：指数関数的に購入意欲が低下
-        purchaseProbability = Math.max(0.02, 0.7 - Math.pow(ratio - 1.0, 1.4) * 0.85);
+        buyProb = Math.max(0.01, 0.72 - Math.pow(ratio - 1.0, 1.45) * 0.88);
     } else {
-        // 相場より安い場合：購入意欲がアップ（上限95%）
-        purchaseProbability = Math.min(0.95, 0.7 + (1.0 - ratio) * 0.5);
+        buyProb = Math.min(0.96, 0.72 + (1.0 - ratio) * 0.55);
     }
 
-    // 購入判定
-    if (Math.random() < purchaseProbability) {
-        // 注文成立！
+    if (Math.random() < buyProb) {
         item.stock--;
         gameState.money += item.price;
         gameState.reputation += 1;
-
-        showToast(`💰 ${item.icon} ${item.name} が売れました！ (+${item.price.toLocaleString()}円)`);
+        showToast(`💰 ${item.icon} ${item.name} が売れました！ (+${item.price.toLocaleString()}円)`, "text-emerald-950 bg-emerald-100 border-emerald-400");
     } else {
-        // 値段が高すぎて見送り
-        showToast(`😤 客「${item.name}（${item.price}円）はちょっと高すぎるな...」`, 'text-amber-800');
+        showToast(`😤 客「${item.name}（${item.price.toLocaleString()}円）はちょっと高すぎるな...」`, "text-amber-950 bg-amber-100 border-amber-400");
     }
 }
 
-// --- メイン描画コントロール ---
 function switchTab(tab) {
     gameState.currentTab = tab;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -371,7 +459,6 @@ function renderView() {
     const view = document.getElementById('viewport');
     view.innerHTML = '';
 
-    // 物件未契約なら「物件契約画面」を表示
     if (!gameState.location) {
         document.getElementById('nav-bar').style.display = 'none';
         renderLocationSelect(view);
@@ -380,22 +467,21 @@ function renderView() {
 
     document.getElementById('nav-bar').style.display = 'grid';
     document.getElementById('shop-title').innerText = gameState.location.name;
+    document.getElementById('shop-location-name').innerText = `📍 ${gameState.location.name}`;
 
     switch (gameState.currentTab) {
         case 'ops': renderOpsView(view); break;
-        case 'supply': renderSupplyView(view); break;
-        case 'menu': renderMenuView(view); break;
         case 'equip': renderEquipView(view); break;
+        case 'menu': renderMenuView(view); break;
         case 'interior': renderInteriorView(view); break;
     }
 }
 
-// --- 1. 物件選択画面 ---
 function renderLocationSelect(container) {
     container.innerHTML = `
-        <div class="bg-white p-4 rounded-xl border-2 border-[#8c5a3c] shadow-md text-center">
-            <h2 class="font-bold text-lg text-[#3d2b22] mb-1">🏡 カフェの創業地を選んでください</h2>
-            <p class="text-xs text-gray-600">自己資金 <span class="font-bold text-emerald-700">3,000,000円</span> からスタートします。<br>どの立地で夢のカフェを開業しますか？</p>
+        <div class="bg-white p-4 rounded-xl border-2 border-[#7a4f33] shadow-md text-center">
+            <h2 class="font-bold text-base text-[#2e1d16] mb-1">🏡 カフェの開業場所を選択してください</h2>
+            <p class="text-xs text-gray-600">自己資金 <span class="font-bold text-emerald-700">3,000,000円</span> からスタートします。<br>理想のカフェにぴったりの物件を契約しましょう！</p>
         </div>
         <div class="space-y-3" id="location-list"></div>
     `;
@@ -403,22 +489,22 @@ function renderLocationSelect(container) {
     const list = container.querySelector('#location-list');
     locationsData.forEach(loc => {
         const card = document.createElement('div');
-        card.className = "bg-white border-2 border-[#d4a359]/60 hover:border-[#d4a359] p-3.5 rounded-xl shadow-sm transition-all flex flex-col justify-between gap-2";
+        card.className = "bg-white border-2 border-[#e5a93c]/60 hover:border-[#e5a93c] p-3.5 rounded-xl shadow-sm transition-all flex flex-col justify-between gap-2.5";
         card.innerHTML = `
             <div class="flex items-start justify-between">
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2.5">
                     <span class="text-3xl">${loc.icon}</span>
                     <div>
-                        <h3 class="font-bold text-base text-[#221815]">${loc.name}</h3>
-                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">客足流動: ${loc.traffic}</span>
+                        <h3 class="font-bold text-sm text-[#1f1512]">${loc.name}</h3>
+                        <span class="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded-full">客足流動: ${loc.traffic}</span>
                     </div>
                 </div>
             </div>
             <p class="text-xs text-gray-600 leading-relaxed">${loc.desc}</p>
             <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                <div class="text-xs font-bold text-gray-500">初期契約料: <span class="text-sm font-black text-rose-700">${loc.cost.toLocaleString()}円</span></div>
-                <button onclick="confirmLocation('${loc.id}')" class="bg-[#8c5a3c] hover:bg-[#6e442b] active:scale-95 text-white font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-md">
-                    この物件を契約
+                <div class="text-xs font-bold text-gray-500">初期保証契約金: <span class="text-sm font-black text-rose-700">${loc.cost.toLocaleString()}円</span></div>
+                <button onclick="confirmLocation('${loc.id}')" class="bg-[#7a4f33] hover:bg-[#5e3b25] active:scale-95 text-white font-bold text-xs px-4 py-2 rounded-lg transition-all shadow-md">
+                    この物件を選択
                 </button>
             </div>
         `;
@@ -437,60 +523,90 @@ function confirmLocation(locId) {
 
     gameState.money -= loc.cost;
     gameState.location = loc;
-    gameState.reputation += 10;
+    gameState.reputation += 15;
     showToast(`🎉 『${loc.name}』でカフェを開業しました！`);
     renderView();
 }
 
-// --- 2. 営業＆バックヤード画面 ---
 function renderOpsView(container) {
     if (!gameState.equipment.pos) {
         container.innerHTML = `
-            <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-xl text-center space-y-3">
+            <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-2xl text-center space-y-3 shadow-sm">
                 <div class="text-4xl">🧾</div>
-                <h3 class="font-bold text-base text-amber-900">POSレジカウンターが未設置です！</h3>
-                <p class="text-xs text-amber-800 leading-relaxed">カフェを営業して注文を受けるには「機材」タブから【POSレジカウンター】を購入・設置してください。</p>
-                <button onclick="switchTab('equip')" class="bg-[#d4a359] text-amber-950 font-bold text-xs px-4 py-2.5 rounded-lg shadow hover:bg-amber-400">機材調達画面へ行く</button>
+                <h3 class="font-bold text-base text-amber-950">POSレジカウンターが未設置です</h3>
+                <p class="text-xs text-amber-900 leading-relaxed">カフェの注文受付とお会計を行うには「設備・機材」タブから【POSレジカウンター】を購入・設置してください。</p>
+                <button onclick="switchTab('equip')" class="bg-[#e5a93c] text-amber-950 font-black text-xs px-5 py-2.5 rounded-xl shadow-md hover:bg-amber-400 active:scale-95 transition-all">設備・機材画面へ移動 ▶</button>
             </div>
         `;
         return;
     }
 
     container.innerHTML = `
-        <!-- 現在のストック状況 -->
-        <div class="bg-white p-3 rounded-xl border border-[#d4a359]/40 shadow-sm">
-            <h3 class="font-bold text-xs text-[#52372b] mb-2 flex items-center justify-between">
-                <span>📦 原料ストック（バックヤード）</span>
-                <button onclick="switchTab('supply')" class="text-[10px] bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded hover:bg-amber-200">仕入れへ ▶</button>
+        <!-- 原料卸売り＆在庫ストック -->
+        <div class="bg-white p-3.5 rounded-xl border border-[#e5a93c]/50 shadow-sm space-y-2.5">
+            <h3 class="font-bold text-xs text-[#472d22] flex items-center justify-between">
+                <span class="flex items-center gap-1.5">📦 原材料の発注卸売り＆在庫</span>
+                <span class="text-[10px] text-gray-500 font-normal">ワンタップで発注仕入れ</span>
             </h3>
-            <div class="grid grid-cols-3 gap-1.5 text-[11px] text-gray-700 font-bold">
-                <div class="bg-amber-50/80 p-1.5 rounded border border-amber-200/60">☕ 珈琲豆: ${gameState.supplies.coffeeBeans}g</div>
-                <div class="bg-amber-50/80 p-1.5 rounded border border-amber-200/60">🥛 ミルク: ${gameState.supplies.milk}ml</div>
-                <div class="bg-amber-50/80 p-1.5 rounded border border-amber-200/60">🌾 小麦粉: ${gameState.supplies.flour}g</div>
-                <div class="bg-amber-50/80 p-1.5 rounded border border-amber-200/60">🍎 果物: ${gameState.supplies.fruit}個</div>
-                <div class="bg-amber-50/80 p-1.5 rounded border border-amber-200/60">🍯 シロップ: ${gameState.supplies.syrup}ml</div>
-            </div>
+            <div class="grid grid-cols-2 gap-2" id="supplies-grid"></div>
         </div>
 
-        <!-- カウンター仕込み・提供可能メニュー -->
+        <!-- 開発済みメニューの仕込み＆価格設定 -->
         <div class="space-y-2">
-            <h3 class="font-bold text-xs text-[#52372b] flex items-center gap-1">
-                <span>☕</span> カフェショーケース（提供仕込み＆価格設定）
+            <h3 class="font-bold text-xs text-[#472d22] flex items-center gap-1">
+                <span>☕</span> カフェショーケース（提供調理・仕込み＆価格設定）
             </h3>
             <div id="ops-menu-list" class="space-y-2.5"></div>
         </div>
     `;
 
+    renderSuppliesGrid(container.querySelector('#supplies-grid'));
     updateOpsMenuList();
 }
 
-function updateOpsViewDynamic() {
-    const list = document.getElementById('ops-menu-list');
-    if (list) {
-        updateOpsMenuList();
-    }
+function renderSuppliesGrid(grid) {
+    grid.innerHTML = '';
+    Object.keys(gameState.supplies).forEach(key => {
+        const sup = gameState.supplies[key];
+        const item = document.createElement('div');
+        item.className = "bg-[#fcf8f3] p-2.5 rounded-xl border border-amber-200/80 flex flex-col justify-between gap-1.5";
+        item.innerHTML = `
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xl">${sup.icon}</span>
+                    <div>
+                        <div class="font-bold text-[11px] text-[#1f1512] leading-tight">${sup.name}</div>
+                        <div class="text-[9px] text-gray-500">${sup.pack}${sup.unit} / ${sup.price.toLocaleString()}円</div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-amber-100">
+                <div class="text-xs font-black text-emerald-700">在庫: ${sup.count} ${sup.unit}</div>
+                <button onclick="buySupply('${key}')" class="bg-[#7a4f33] hover:bg-[#5e3b25] active:scale-95 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow transition-all">
+                    発注
+                </button>
+            </div>
+        `;
+        grid.appendChild(item);
+    });
 }
 
+function buySupply(key) {
+    const sup = gameState.supplies[key];
+    if (!sup) return;
+
+    if (gameState.money < sup.price) {
+        showToast("❌ 資金が足りません！");
+        return;
+    }
+
+    gameState.money -= sup.price;
+    sup.count += sup.pack;
+    showToast(`📦 『${sup.name}』を${sup.pack}${sup.unit}発注しました！`);
+    renderView();
+}
+
+// 調理・仕込みプログレスバー＆メニュー管理
 function updateOpsMenuList() {
     const list = document.getElementById('ops-menu-list');
     if (!list) return;
@@ -498,8 +614,8 @@ function updateOpsMenuList() {
     const unlocked = gameState.recipes.filter(r => r.unlocked);
     if (unlocked.length === 0) {
         list.innerHTML = `
-            <div class="bg-white p-4 rounded-xl text-center text-xs text-gray-500 border border-gray-200">
-                提供可能なカフェメニューがありません。<br>「開発」タブでメニューを新しく考案しましょう！
+            <div class="bg-white p-5 rounded-2xl text-center text-xs text-gray-500 border border-gray-200">
+                提供可能なメニューがありません。<br>「レシピ開発」タブで新しい商品を開発しましょう！
             </div>
         `;
         return;
@@ -507,63 +623,81 @@ function updateOpsMenuList() {
 
     list.innerHTML = '';
     unlocked.forEach(recipe => {
-        // 原料チェック
+        // 必要原材料チェック
         let canPrepare = true;
+        let missingText = [];
         for (let ing in recipe.reqIngredients) {
-            if (gameState.supplies[ing] < recipe.reqIngredients[ing]) {
+            const reqAmount = recipe.reqIngredients[ing];
+            const currentAmount = gameState.supplies[ing].count;
+            if (currentAmount < reqAmount) {
                 canPrepare = false;
-                break;
+                missingText.push(gameState.supplies[ing].name);
             }
         }
 
-        // 需要予測の文言評価
+        // 価格弾力性テキスト評価
         const ratio = recipe.price / recipe.stdPrice;
         let demandText = "適正価格（安定需要）";
-        let demandColor = "text-emerald-600 bg-emerald-50";
-        if (ratio > 1.4) {
+        let demandColor = "text-emerald-700 bg-emerald-50 border-emerald-200";
+        if (ratio > 1.35) {
             demandText = "高すぎる（客足激減）";
-            demandColor = "text-rose-600 bg-rose-50";
-        } else if (ratio > 1.15) {
-            demandText = "強気（やや買われにくい）";
-            demandColor = "text-amber-600 bg-amber-50";
-        } else if (ratio < 0.85) {
+            demandColor = "text-rose-700 bg-rose-50 border-rose-200";
+        } else if (ratio > 1.12) {
+            demandText = "強気（やや不人気）";
+            demandColor = "text-amber-800 bg-amber-50 border-amber-200";
+        } else if (ratio < 0.88) {
             demandText = "割安（大人気！）";
-            demandColor = "text-blue-600 bg-blue-50";
+            demandColor = "text-blue-700 bg-blue-50 border-blue-200";
         }
 
         const card = document.createElement('div');
-        card.className = "bg-white p-3 rounded-xl border border-gray-200 shadow-sm space-y-2";
+        card.className = "bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2.5";
         card.innerHTML = `
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">${recipe.icon}</span>
+                <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">${recipe.icon}</span>
                     <div>
-                        <h4 class="font-bold text-sm text-[#221815]">${recipe.name}</h4>
-                        <div class="text-[10px] text-gray-500">原価: 約${recipe.baseCost}円 | 標準相場: ${recipe.stdPrice}円</div>
+                        <div class="flex items-center gap-1.5">
+                            <h4 class="font-bold text-sm text-[#1f1512]">${recipe.name}</h4>
+                            <span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-bold">${recipe.categoryName}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">推定原価: 約${recipe.baseCost}円 | 相場: ${recipe.stdPrice.toLocaleString()}円</div>
                     </div>
                 </div>
                 <div class="text-right">
-                    <span class="text-xs font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full">店頭在庫: ${recipe.stock}個</span>
+                    <span class="text-xs font-black bg-amber-100 text-amber-950 px-2.5 py-1 rounded-full border border-amber-300">店頭在庫: ${recipe.stock}個</span>
                 </div>
             </div>
 
-            <!-- 価格調整 ＆ 需要評価 -->
-            <div class="bg-gray-50 p-2 rounded-lg flex items-center justify-between gap-2 border border-gray-200">
-                <div class="flex items-center gap-1">
+            <!-- 販売価格調整 ＆ 需要評価 -->
+            <div class="bg-[#fbf8f5] p-2 rounded-xl flex items-center justify-between gap-2 border border-gray-200">
+                <div class="flex items-center gap-1.5">
                     <span class="text-xs font-bold text-gray-700">提供価格:</span>
                     <input type="number" value="${recipe.price}" step="10" min="50" onchange="changeRecipePrice('${recipe.id}', this.value)" 
-                           class="w-20 px-2 py-1 text-xs font-bold border border-gray-300 rounded text-right focus:outline-none focus:border-[#8c5a3c]">
+                           class="w-20 px-2 py-1 text-xs font-black border border-gray-300 rounded-lg text-right focus:outline-none focus:border-[#7a4f33]">
                     <span class="text-xs font-bold">円</span>
                 </div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${demandColor}">${demandText}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${demandColor}">${demandText}</span>
             </div>
 
-            <!-- 仕込み準備ボタン -->
-            <button onclick="prepareRecipe('${recipe.id}')" ${!canPrepare || recipe.isPreparing ? 'disabled' : ''} 
-                    class="w-full py-2 rounded-lg font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2
-                    ${recipe.isPreparing ? 'bg-amber-200 text-amber-800' : (canPrepare ? 'bg-[#8c5a3c] hover:bg-[#6e442b] text-white active:scale-[0.99]' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}">
-                ${recipe.isPreparing ? '☕ 仕込み調理中...' : (canPrepare ? '🍳 まとめて仕込み調理する (原料1セット消費)' : '原料不足のため仕込み不可')}
-            </button>
+            <!-- プログレスバー（調理中表示） -->
+            ${recipe.isPreparing ? `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] font-bold text-amber-900">
+                        <span>🍳 調理・仕込み中...</span>
+                        <span>${recipe.prepProgress}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-[#e5a93c] h-2.5 rounded-full progress-bar-inner" style="width: ${recipe.prepProgress}%"></div>
+                    </div>
+                </div>
+            ` : `
+                <button onclick="startPreparing('${recipe.id}')" ${!canPrepare ? 'disabled' : ''} 
+                        class="w-full py-2 rounded-xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5
+                        ${canPrepare ? 'bg-[#7a4f33] hover:bg-[#5e3b25] text-white active:scale-[0.99]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}">
+                    ${canPrepare ? '🍳 仕込み調理を行う (原料1セット消費 ➔ 完成品+3)' : `❌ 不足: ${missingText.join(', ')}`}
+                </button>
+            `}
         `;
         list.appendChild(card);
     });
@@ -581,171 +715,50 @@ function changeRecipePrice(recipeId, val) {
     }
 }
 
-function prepareRecipe(recipeId) {
+function startPreparing(recipeId) {
     const recipe = gameState.recipes.find(r => r.id === recipeId);
     if (!recipe || recipe.isPreparing) return;
 
-    // 消費原料チェック
+    // 原材料消費
     for (let ing in recipe.reqIngredients) {
-        if (gameState.supplies[ing] < recipe.reqIngredients[ing]) {
-            showToast("❌ 原料が不足しています！仕入れを行ってください。");
-            return;
-        }
-    }
-
-    // 原料消費
-    for (let ing in recipe.reqIngredients) {
-        gameState.supplies[ing] -= recipe.reqIngredients[ing];
+        gameState.supplies[ing].count -= recipe.reqIngredients[ing];
     }
 
     recipe.isPreparing = true;
+    recipe.prepProgress = 0;
     updateOpsMenuList();
 
-    // タイマー仕込み調理
-    setTimeout(() => {
-        recipe.isPreparing = false;
-        recipe.stock += 3; // 1回の仕込みで3個分作成
-        showToast(`✨ ${recipe.icon} ${recipe.name} の仕込み完了！ (在庫+3個)`);
-        renderView();
-    }, recipe.prepTime * 600);
+    // プログレスバーアニメーションタイマー
+    const intervalTime = (recipe.prepTime * 1000) / 20;
+    const timer = setInterval(() => {
+        recipe.prepProgress += 5;
+        if (recipe.prepProgress >= 100) {
+            clearInterval(timer);
+            recipe.isPreparing = false;
+            recipe.prepProgress = 0;
+            recipe.stock += 3;
+            showToast(`✨ ${recipe.icon} ${recipe.name} の仕込み完了！ (在庫+3個)`);
+            renderView();
+        } else {
+            updateOpsMenuList();
+        }
+    }, intervalTime);
 }
 
-// --- 3. 原料仕入れ画面 ---
-function renderSupplyView(container) {
-    const supplyItems = [
-        { key: 'coffeeBeans', name: '最高級アラビカ珈琲豆', icon: '☕', unit: 'g', pack: 500, price: 2200, desc: '豊かなコクと芳醇な香りの定番ブレンド豆。' },
-        { key: 'milk', name: 'ジャージー特選牛乳', icon: '🥛', unit: 'ml', pack: 2000, price: 1400, desc: 'ラテアートやドリンクの味わいを引き立てる濃厚ミルク。' },
-        { key: 'flour', name: '製菓用プレミアム小麦粉', icon: '🌾', unit: 'g', pack: 1000, price: 900, desc: 'スコーンやパンケーキがふわふわに仕上がる特製粉。' },
-        { key: 'fruit', name: '契約農家直送フルーツパック', icon: '🍎', unit: '個', pack: 20, price: 3200, desc: 'パフェやスイーツを引き立てる旬の果物。' },
-        { key: 'syrup', name: '自家製オーガニックシロップ', icon: '🍯', unit: 'ml', pack: 1000, price: 1800, desc: '優しい甘みをつけるこだわりの天然シロップ。' }
-    ];
-
-    container.innerHTML = `
-        <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm mb-3">
-            <h3 class="font-bold text-sm text-[#3d2b22] mb-1">📦 バックヤードの材料卸業者</h3>
-            <p class="text-xs text-gray-600">メニューの仕込みに必要な各原料を仕入れます。</p>
-        </div>
-        <div class="space-y-2.5" id="supply-list"></div>
-    `;
-
-    const list = container.querySelector('#supply-list');
-    supplyItems.forEach(item => {
-        const card = document.createElement('div');
-        card.className = "bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-3";
-        card.innerHTML = `
-            <div class="flex items-center gap-2.5">
-                <span class="text-3xl">${item.icon}</span>
-                <div>
-                    <h4 class="font-bold text-xs text-[#221815]">${item.name}</h4>
-                    <p class="text-[10px] text-gray-500">${item.desc}</p>
-                    <div class="text-xs font-bold text-emerald-700 mt-0.5">
-                        所持数: <span class="font-black">${gameState.supplies[item.key]}</span> ${item.unit}
-                    </div>
-                </div>
-            </div>
-            <div class="text-right shrink-0">
-                <div class="text-xs font-bold text-gray-800 mb-1">${item.pack}${item.unit} / <span class="text-rose-700">${item.price.toLocaleString()}円</span></div>
-                <button onclick="buySupply('${item.key}', ${item.pack}, ${item.price})" class="bg-[#8c5a3c] hover:bg-[#6e442b] active:scale-95 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow transition-all">
-                    発注仕入れ
-                </button>
-            </div>
-        `;
-        list.appendChild(card);
-    });
-}
-
-function buySupply(key, pack, price) {
-    if (gameState.money < price) {
-        showToast("❌ 資金が足りません！");
-        return;
-    }
-    gameState.money -= price;
-    gameState.supplies[key] += pack;
-    showToast(`📦 原料を入荷しました！ (+${pack})`);
-    renderView();
-}
-
-// --- 4. カフェメニュー開発画面 ---
-function renderMenuView(container) {
-    container.innerHTML = `
-        <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm mb-3">
-            <h3 class="font-bold text-sm text-[#3d2b22] mb-1">📖 カフェメニュー考案＆レシピ開発</h3>
-            <p class="text-xs text-gray-600">必要な機材を揃えてレシピを新しく解放・試作できます。</p>
-        </div>
-        <div class="space-y-3" id="recipe-list"></div>
-    `;
-
-    const list = container.querySelector('#recipe-list');
-    gameState.recipes.forEach(recipe => {
-        const hasEquip = gameState.equipment[recipe.reqEquip];
-        const card = document.createElement('div');
-        card.className = "bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm space-y-2";
-        
-        let equipName = getEquipName(recipe.reqEquip);
-
-        card.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-3xl">${recipe.icon}</span>
-                    <div>
-                        <h4 class="font-bold text-sm text-[#221815]">${recipe.name}</h4>
-                        <div class="text-[10px] text-gray-500">標準相場: ${recipe.stdPrice.toLocaleString()}円</div>
-                    </div>
-                </div>
-                <span class="text-xs font-bold px-2 py-1 rounded-full ${recipe.unlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500'}">
-                    ${recipe.unlocked ? '開発完了' : '未解放'}
-                </span>
-            </div>
-
-            <div class="text-xs text-gray-600 bg-amber-50/70 p-2 rounded-lg border border-amber-200/50">
-                必要機材: <span class="font-bold text-amber-900">${equipName}</span> ${hasEquip ? '✅ (導入済)' : '❌ (未設置)'}
-            </div>
-
-            <button onclick="unlockRecipe('${recipe.id}')" ${recipe.unlocked || !hasEquip ? 'disabled' : ''} 
-                    class="w-full py-2 rounded-lg font-bold text-xs transition-all shadow-sm
-                    ${recipe.unlocked ? 'bg-gray-200 text-gray-500 cursor-default' : (hasEquip ? 'bg-[#d4a359] hover:bg-amber-400 text-amber-950 active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}">
-                ${recipe.unlocked ? '開発済み' : (hasEquip ? 'レシピを新開発する' : '必要な機材がありません')}
-            </button>
-        `;
-        list.appendChild(card);
-    });
-}
-
-function unlockRecipe(recipeId) {
-    const r = gameState.recipes.find(item => item.id === recipeId);
-    if (r && !r.unlocked) {
-        r.unlocked = true;
-        gameState.reputation += 15;
-        showToast(`🎉 新メニュー『${r.name}』の開発に成功しました！`);
-        renderView();
-    }
-}
-
-function getEquipName(key) {
-    const names = {
-        pos: 'POSレジカウンター',
-        drip: 'ハンドドリップセット',
-        espresso: 'エスプレッソマシン',
-        grinder: '高機能グラインダー',
-        oven: '高性能オーブン'
-    };
-    return names[key] || '標準設備';
-}
-
-// --- 5. 厨房・機材設置画面 ---
 function renderEquipView(container) {
     const equipMaster = [
-        { key: 'pos', name: 'POSレジカウンター', icon: '🧾', price: 250000, desc: '【必須】注文と会計を行う基本カウンター。カフェ営業に絶対必要。' },
-        { key: 'drip', name: 'ハンドドリップセット', icon: '☕', price: 180000, desc: '丁寧に入れるハンドドリップコーヒーの提供に必須。' },
-        { key: 'espresso', name: 'イタリア製エスプレッソマシン', icon: '🥛', price: 680000, desc: '本格カフェラテなどのエスプレッソメニュー抽出用。' },
-        { key: 'oven', name: '製菓用プロオーブン', icon: '🍞', price: 420000, desc: 'パンケーキやスコーンなどをサクサクに焼き上げる。' },
-        { key: 'grinder', name: 'フラット刃コーヒーグラインダー', icon: '⚙️', price: 220000, desc: '珈琲豆の挽き目を均一にし、味わいと評判を極限までUP。' }
+        { key: 'pos', name: 'POSレジカウンター', icon: '🧾', price: 250000, desc: '【必須】注文受付とお会計を行うカウンター。営業の絶対必須設備。' },
+        { key: 'drip', name: 'ハンドドリップカウンター', icon: '☕', price: 180000, desc: '丁寧に入れるハンドドリップ・アールグレイ抽出に必要なセット。' },
+        { key: 'espresso', name: 'イタリア製エスプレッソマシン', icon: '🥛', price: 680000, desc: '濃厚カフェラテや宇治抹茶ラテを抽出する本格抽出機。' },
+        { key: 'kitchen', name: '調理キッチン＆フライパン', icon: '🍳', price: 350000, desc: '小倉バタートーストやクラシックナポリタン調理用の厨房機材。' },
+        { key: 'oven', name: '製菓用プロオーブン', icon: '🍞', price: 480000, desc: 'スフレパンケーキや苺ショート、ショコラテリーヌ用の高性能オーブン。' },
+        { key: 'parfait', name: 'パフェ＆冷菓専用作業台', icon: '🍨', price: 300000, desc: '自家製抹茶パフェや冷製スイーツの仕上げ用ワークスペース。' }
     ];
 
     container.innerHTML = `
         <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm mb-3">
-            <h3 class="font-bold text-sm text-[#3d2b22] mb-1">⚙️ 厨房機器・カウンター設備</h3>
-            <p class="text-xs text-gray-600">機材を揃えることで提供できるメニューの種類が増えます。</p>
+            <h3 class="font-bold text-sm text-[#2e1d16] mb-1">⚙️ 厨房機器・カウンター設備</h3>
+            <p class="text-xs text-gray-600">必要な設備を揃えることで、開発・提供できるレシピが解放されます。</p>
         </div>
         <div class="space-y-3" id="equip-list"></div>
     `;
@@ -754,12 +767,12 @@ function renderEquipView(container) {
     equipMaster.forEach(item => {
         const isBought = gameState.equipment[item.key];
         const card = document.createElement('div');
-        card.className = "bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-3";
+        card.className = "bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between gap-3";
         card.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-3xl">${item.icon}</span>
                 <div>
-                    <h4 class="font-bold text-xs text-[#221815]">${item.name}</h4>
+                    <h4 class="font-bold text-xs text-[#1f1512]">${item.name}</h4>
                     <p class="text-[10px] text-gray-500 leading-tight mt-0.5">${item.desc}</p>
                 </div>
             </div>
@@ -767,7 +780,7 @@ function renderEquipView(container) {
                 <div class="text-xs font-black text-rose-700 mb-1">${item.price.toLocaleString()}円</div>
                 <button onclick="buyEquip('${item.key}', ${item.price})" ${isBought ? 'disabled' : ''} 
                         class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm
-                        ${isBought ? 'bg-emerald-100 text-emerald-800 cursor-default' : 'bg-[#8c5a3c] hover:bg-[#6e442b] text-white active:scale-95'}">
+                        ${isBought ? 'bg-emerald-100 text-emerald-800 cursor-default' : 'bg-[#7a4f33] hover:bg-[#5e3b25] text-white active:scale-95'}">
                     ${isBought ? '設置完了' : '購入設置'}
                 </button>
             </div>
@@ -783,17 +796,87 @@ function buyEquip(key, price) {
     }
     gameState.money -= price;
     gameState.equipment[key] = true;
-    gameState.reputation += 10;
-    showToast(`⚙️ 機材を厨房に導入設置しました！`);
+    gameState.reputation += 12;
+    showToast(`⚙️ 『${getEquipName(key)}』を導入設置しました！`);
     renderView();
 }
 
-// --- 6. 店内カスタマイズ・内装画面 ---
+function renderMenuView(container) {
+    container.innerHTML = `
+        <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm mb-3">
+            <h3 class="font-bold text-sm text-[#2e1d16] mb-1">📖 メニュー開発＆新レシピ考案</h3>
+            <p class="text-xs text-gray-600">設備を導入したら、新メニューを試作・開発してラインナップを増やしましょう。</p>
+        </div>
+        <div class="space-y-3" id="recipe-list"></div>
+    `;
+
+    const list = container.querySelector('#recipe-list');
+    gameState.recipes.forEach(recipe => {
+        const hasEquip = gameState.equipment[recipe.reqEquip];
+        const card = document.createElement('div');
+        card.className = "bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2";
+        
+        let equipName = getEquipName(recipe.reqEquip);
+
+        card.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">${recipe.icon}</span>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h4 class="font-bold text-sm text-[#1f1512]">${recipe.name}</h4>
+                            <span class="text-[9px] bg-amber-100 text-amber-900 px-1.5 py-0.2 rounded font-bold">${recipe.categoryName}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">標準相場: ${recipe.stdPrice.toLocaleString()}円</div>
+                    </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full ${recipe.unlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500'}">
+                    ${recipe.unlocked ? '開発完了' : '未解放'}
+                </span>
+            </div>
+
+            <div class="text-xs text-gray-600 bg-amber-50/70 p-2 rounded-xl border border-amber-200/50 flex items-center justify-between">
+                <span>必要設備: <span class="font-bold text-amber-950">${equipName}</span></span>
+                <span>${hasEquip ? '✅ (設置済み)' : '❌ (未設置)'}</span>
+            </div>
+
+            <button onclick="unlockRecipe('${recipe.id}')" ${recipe.unlocked || !hasEquip ? 'disabled' : ''} 
+                    class="w-full py-2 rounded-xl font-bold text-xs transition-all shadow-sm
+                    ${recipe.unlocked ? 'bg-gray-200 text-gray-500 cursor-default' : (hasEquip ? 'bg-[#e5a93c] hover:bg-amber-400 text-amber-950 active:scale-95' : 'bg-gray-200 text-gray-400 cursor-not-allowed')}">
+                ${recipe.unlocked ? '開発済み' : (hasEquip ? 'レシピを新開発・考案する' : '必要な設備が未設置です')}
+            </button>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function unlockRecipe(recipeId) {
+    const r = gameState.recipes.find(item => item.id === recipeId);
+    if (r && !r.unlocked) {
+        r.unlocked = true;
+        gameState.reputation += 18;
+        showToast(`🎉 新メニュー『${r.name}』の開発に成功しました！`);
+        renderView();
+    }
+}
+
+function getEquipName(key) {
+    const names = {
+        pos: 'POSレジカウンター',
+        drip: 'ハンドドリップカウンター',
+        espresso: 'イタリア製エスプレッソマシン',
+        kitchen: '調理キッチン＆フライパン',
+        oven: '製菓用プロオーブン',
+        parfait: 'パフェ＆冷菓専用作業台'
+    };
+    return names[key] || '基本設備';
+}
+
 function renderInteriorView(container) {
     container.innerHTML = `
         <div class="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm mb-3">
-            <h3 class="font-bold text-sm text-[#3d2b22] mb-1">🛋️ 店内カスタマイズ＆内装インテリア</h3>
-            <p class="text-xs text-gray-600">お店の雰囲気と居心地を高めて評判（集客力）を底上げします。</p>
+            <h3 class="font-bold text-sm text-[#2e1d16] mb-1">🛋️ 店内カスタマイズ＆店舗改装</h3>
+            <p class="text-xs text-gray-600">お店の雰囲気や居心地を向上させ、カフェ評判（集客力）を大幅に向上させます。</p>
         </div>
         <div class="space-y-3" id="interior-list"></div>
     `;
@@ -802,21 +885,21 @@ function renderInteriorView(container) {
     Object.keys(gameState.interiors).forEach(key => {
         const item = gameState.interiors[key];
         const card = document.createElement('div');
-        card.className = "bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-3";
+        card.className = "bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between gap-3";
         card.innerHTML = `
             <div class="flex items-center gap-3">
                 <span class="text-3xl">${item.icon}</span>
                 <div>
-                    <h4 class="font-bold text-xs text-[#221815]">${item.name}</h4>
+                    <h4 class="font-bold text-xs text-[#1f1512]">${item.name}</h4>
                     <p class="text-[10px] text-gray-500 leading-tight mt-0.5">${item.desc}</p>
-                    <div class="text-[10px] font-bold text-amber-700 mt-1">評判アップ: +${item.repBoost} pt</div>
+                    <div class="text-[10px] font-bold text-amber-800 mt-1">評判アップ: +${item.repBoost} pt</div>
                 </div>
             </div>
             <div class="text-right shrink-0">
                 <div class="text-xs font-black text-rose-700 mb-1">${item.cost.toLocaleString()}円</div>
                 <button onclick="buyInterior('${key}')" ${item.bought ? 'disabled' : ''} 
                         class="px-3 py-1.5 rounded-lg font-bold text-xs transition-all shadow-sm
-                        ${item.bought ? 'bg-emerald-100 text-emerald-800 cursor-default' : 'bg-[#8c5a3c] hover:bg-[#6e442b] text-white active:scale-95'}">
+                        ${item.bought ? 'bg-emerald-100 text-emerald-800 cursor-default' : 'bg-[#7a4f33] hover:bg-[#5e3b25] text-white active:scale-95'}">
                     ${item.bought ? '改装済み' : '改装発注'}
                 </button>
             </div>
@@ -837,21 +920,20 @@ function buyInterior(key) {
     gameState.money -= item.cost;
     item.bought = true;
     gameState.reputation += item.repBoost;
-    showToast(`✨ 『${item.name}』の改装・導入が完了しました！`);
+    showToast(`✨ 『${item.name}』の店舗改装が完了しました！`);
     renderView();
 }
 
-// --- 共通トースト通知表示 ---
-function showToast(msg, colorClass = 'text-white bg-[#221815]') {
+function showToast(msg, colorClass = 'text-white bg-[#1f1512]') {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = `toast-float px-3 py-1.5 rounded-full text-xs font-bold shadow-lg border border-amber-400/30 ${colorClass}`;
+    toast.className = `toast-float px-3.5 py-2 rounded-full text-xs font-bold shadow-xl border border-amber-400/40 ${colorClass}`;
     toast.innerText = msg;
 
     container.appendChild(toast);
-    setTimeout(() => toast.remove(), 1200);
+    setTimeout(() => toast.remove(), 1400);
 }
 </script>
 </body>
