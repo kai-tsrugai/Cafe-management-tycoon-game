@@ -1,11 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>モバイル専用 カフェ経営シミュレーション</title>
-    <!-- STREAMING_CHUNK:Styling the mobile-first layout... -->
     <style>
         :root {
             --bg-color: #f7f3ee;
@@ -43,7 +41,7 @@
             align-items: center;
         }
 
-        /* モバイルコンテナ */
+        /* モバイルコンテナ (100dvh & safe-area対応) */
         #game-container {
             width: 100%;
             max-width: 480px;
@@ -62,7 +60,7 @@
             background: var(--accent-brown);
             color: #ffffff;
             padding: calc(var(--safe-area-top) + 8px) 12px 8px 12px;
-            shrink: 0;
+            flex-shrink: 0;
             z-index: 20;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
@@ -73,7 +71,6 @@
             align-items: center;
             font-size: 1rem;
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
         .env-bar {
@@ -101,7 +98,7 @@
             text-align: center;
         }
 
-        /* スクロール可能なメインビュー領域 */
+        /* ビューポート（スクロール領域） */
         #viewport {
             flex: 1;
             padding: 12px;
@@ -114,14 +111,13 @@
             padding-bottom: 20px;
         }
 
-        /* カードデザイン */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 14px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
-            shrink: 0;
+            flex-shrink: 0;
         }
 
         .card-title {
@@ -156,8 +152,8 @@
         }
 
         .action-btn:active {
+            opacity: 0.85;
             transform: scale(0.98);
-            opacity: 0.9;
         }
 
         .action-btn:disabled {
@@ -189,31 +185,118 @@
             background: #fff;
         }
 
+        /* 店内マップ・ビジュアル要素 */
+        .cafe-map {
+            width: 100%;
+            background: #e8d8c8;
+            border: 2px solid #6f4727;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+        }
+
+        .zone-title {
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: #5c3d2e;
+            margin-bottom: 4px;
+            border-bottom: 1px dashed #a1887f;
+            padding-bottom: 2px;
+        }
+
+        .kitchen-area {
+            background: #d7ccc8;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            min-height: 55px;
+        }
+
+        .counter-area {
+            background: #bcaaa4;
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #3e2723;
+        }
+
+        .seating-area {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .table-node {
+            background: #ffffff;
+            border: 2px solid #a1887f;
+            border-radius: 10px;
+            padding: 8px;
+            min-height: 85px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .customer-avatar {
+            font-size: 1.8rem;
+            line-height: 1;
+            margin-top: 4px;
+        }
+
+        .speech-bubble {
+            position: absolute;
+            top: -12px;
+            background: #fff;
+            border: 1px solid #795548;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-3px); }
+        }
+
         /* ボトムナビゲーション */
         #nav-tabs {
             display: flex;
             background: var(--accent-brown);
             overflow-x: auto;
-            shrink: 0;
+            flex-shrink: 0;
             z-index: 20;
             border-top: 1px solid rgba(255,255,255,0.1);
             padding-bottom: var(--safe-area-bottom);
-            -webkit-overflow-scrolling: touch;
         }
 
-        #nav-tabs::-webkit-scrollbar {
-            display: none;
-        }
+        #nav-tabs::-webkit-scrollbar { display: none; }
 
         .tab-item {
             flex: 1;
-            min-width: 68px;
+            min-width: 60px;
             height: 52px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 0.68rem;
+            font-size: 0.65rem;
             font-weight: bold;
             color: #d7ccc8;
             border: none;
@@ -223,52 +306,44 @@
             gap: 2px;
         }
 
-        .tab-item span.icon {
-            font-size: 1.1rem;
-        }
-
         .tab-item.active {
             color: #ffffff;
             background: var(--accent-brown-light);
             border-top: 3px solid #ffb74d;
         }
 
-        /* フローティング通知テキスト */
         .float-text {
             position: fixed;
             color: #1b5e20;
             font-weight: 800;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             pointer-events: none;
             animation: floatUp 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             z-index: 999;
-            text-shadow: 0 1px 3px #ffffff;
-            background: rgba(255,255,255,0.85);
-            padding: 4px 12px;
-            border-radius: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 10px;
+            border-radius: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         @keyframes floatUp {
-            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
-            20% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -20px) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -35px) scale(0.95); }
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -30px); }
         }
 
         .review-box {
             background: #fffde7;
             border: 1px solid #fff59d;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            margin-bottom: 8px;
-            font-size: 0.82rem;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
 
-<!-- STREAMING_CHUNK:Initializing Mobile HTML Structure... -->
 <div id="game-container">
     <header>
         <div class="header-top">
@@ -278,7 +353,7 @@
         <div class="env-bar">
             <span>🕒 <span id="time-display">08:00 (モーニング)</span></span>
             <span>☀️ <span id="weather-display">晴れ</span></span>
-            <span>🔥 集客力: <span id="buzz-display">100%</span></span>
+            <span>🔥 集客: <span id="buzz-display">100%</span></span>
         </div>
         <div class="stats-bar">
             <div>💰 <span id="money">3,000,000</span>円</div>
@@ -290,28 +365,27 @@
     <div id="viewport"></div>
 
     <nav id="nav-tabs" style="display: none;">
-        <button class="tab-item active" id="tab-kitchen" onclick="switchTab('kitchen')">
-            <span class="icon">🍳</span><span>厨房・価格</span>
+        <button class="tab-item active" id="tab-floor" onclick="switchTab('floor')">
+            <span style="font-size:1.1rem;">🏪</span><span>店内マップ</span>
+        </button>
+        <button class="tab-item" id="tab-kitchen" onclick="switchTab('kitchen')">
+            <span style="font-size:1.1rem;">🍳</span><span>厨房・価格</span>
         </button>
         <button class="tab-item" id="tab-staff" onclick="switchTab('staff')">
-            <span class="icon">👥</span><span>人事・研修</span>
+            <span style="font-size:1.1rem;">👥</span><span>人事・研修</span>
         </button>
         <button class="tab-item" id="tab-promo" onclick="switchTab('promo')">
-            <span class="icon">📢</span><span>宣伝・集客</span>
+            <span style="font-size:1.1rem;">📢</span><span>宣伝・集客</span>
         </button>
         <button class="tab-item" id="tab-report" onclick="switchTab('report')">
-            <span class="icon">📊</span><span>経営レポート</span>
-        </button>
-        <button class="tab-item" id="tab-reviews" onclick="switchTab('reviews')">
-            <span class="icon">⭐</span><span>口コミ</span>
+            <span style="font-size:1.1rem;">📊</span><span>レポート</span>
         </button>
         <button class="tab-item" id="tab-shop" onclick="switchTab('shop')">
-            <span class="icon">⚙️</span><span>設備・拡張</span>
+            <span style="font-size:1.1rem;">⚙️</span><span>設備拡張</span>
         </button>
     </nav>
 </div>
 
-<!-- STREAMING_CHUNK:Configuring state and mobile logic... -->
 <script>
     let state = {
         money: 3000000,
@@ -319,41 +393,27 @@
         hasShop: false,
         shopType: '',
         concept: 'standard',
-        currentTab: 'kitchen',
+        currentTab: 'floor',
         hour: 8,
         weather: '晴れ',
         buzzMultiplier: 1.0,
         
-        // 財務累計
         totalRevenue: 0,
         totalCost: 0,
         totalLaborCost: 0,
-        totalWasteCost: 0,
 
-        // 人事
-        staff: {
-            partTime: 0,
-            fullTime: 0,
-            skillLevel: 1
-        },
+        staff: { partTime: 0, fullTime: 0, skillLevel: 1 },
+        equipment: { counter: false, coffeeMaker: false, kitchenLine: false, patisserieOven: false },
+        ingredients: { beans: 0, milk: 0, flour: 0, fruits: 0 },
 
-        // 設備
-        equipment: {
-            counter: false,
-            coffeeMaker: false,
-            kitchenLine: false,
-            patisserieOven: false
-        },
+        // 店内テーブル席の状態
+        tables: [
+            { id: 1, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
+            { id: 2, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
+            { id: 3, occupied: false, customer: null, item: null, state: 'empty', timer: 0 },
+            { id: 4, occupied: false, customer: null, item: null, state: 'empty', timer: 0 }
+        ],
 
-        // 原材料在庫
-        ingredients: {
-            beans: 0,
-            milk: 0,
-            flour: 0,
-            fruits: 0
-        },
-
-        // レシピ
         recipes: [
             { id: 'coffee', name: 'ハウスブレンド', category: 'drink', icon: '☕', reqEquip: 'coffeeMaker', ingKey: 'beans', ingCost: 80, stdPrice: 550, price: 550, unlocked: true, stock: 0 },
             { id: 'latte', name: '濃厚カフェラテ', category: 'drink', icon: '🥛', reqEquip: 'coffeeMaker', ingKey: 'milk', ingCost: 110, stdPrice: 650, price: 650, unlocked: false, stock: 0 },
@@ -361,34 +421,34 @@
             { id: 'cake', name: '特製ショートケーキ', category: 'sweet', icon: '🍰', reqEquip: 'patisserieOven', ingKey: 'fruits', ingCost: 350, stdPrice: 1500, price: 1500, unlocked: false, stock: 0 }
         ],
 
-        // 口コミ履歴
         reviews: [
             { stars: '⭐⭐⭐⭐⭐', text: 'オープンの日を楽しみにしています！', author: '近所の住民' }
         ]
     };
 
+    const CUSTOMER_AVATARS = ['👨‍💼', '👩‍💼', '👵', '👨‍🎓', '👩‍🎨', '🧔', '👩‍💻'];
+
     function init() {
         render();
-        setInterval(gameClockLoop, 3000); // 3秒で1時間進行
-        setInterval(customerLoop, 1500);   // 来店判定
+        setInterval(gameClockLoop, 3000);
+        setInterval(customerLoop, 1200);
+        setInterval(updateSeats, 1000);
     }
 
-    // STREAMING_CHUNK:Defining game loop and header updates...
     function gameClockLoop() {
         if (!state.hasShop) return;
         
         state.hour = (state.hour + 1) % 24;
         if (state.hour === 0) {
-            state.hour = 7; // 朝7時に開店
+            state.hour = 7;
             const weathers = ['晴れ', '晴れ', '曇り', '雨', '猛暑'];
             state.weather = weathers[Math.floor(Math.random() * weathers.length)];
             
-            // 人件費の自動引き落とし
             const dailyLabor = (state.staff.partTime * 9600) + (state.staff.fullTime * 16000);
             if (dailyLabor > 0) {
                 state.money -= dailyLabor;
                 state.totalLaborCost += dailyLabor;
-                showFloatText(`人件費清算 -${dailyLabor.toLocaleString()}円`);
+                showFloatText(`人件費精算 -${dailyLabor.toLocaleString()}円`);
             }
         }
 
@@ -415,7 +475,6 @@
         document.getElementById('buzz-display').innerText = Math.round(state.buzzMultiplier * 100) + '%';
     }
 
-    // STREAMING_CHUNK:Rendering viewport and mobile initial choice view...
     function render() {
         renderHeader();
         const view = document.getElementById('viewport');
@@ -457,6 +516,7 @@
         const conceptNames = { standard:'標準', retro:'純喫茶', modern:'本格派', sweet:'スイーツ' };
         document.getElementById('concept-tag').innerText = conceptNames[state.concept] || '標準';
 
+        if (state.currentTab === 'floor') renderFloorMap(view);
         if (state.currentTab === 'kitchen') renderKitchen(view);
         if (state.currentTab === 'staff') renderStaff(view);
         if (state.currentTab === 'promo') renderPromo(view);
@@ -465,13 +525,138 @@
         if (state.currentTab === 'shop') renderShop(view);
     }
 
-    // STREAMING_CHUNK:Rendering kitchen and items...
+    function renderFloorMap(view) {
+        let staffIcons = '';
+        const totalStaff = state.staff.partTime + state.staff.fullTime;
+        for (let i = 0; i < Math.min(totalStaff, 3); i++) {
+            staffIcons += '👨‍🍳 ';
+        }
+
+        let html = `
+            <div class="card">
+                <div class="card-title">
+                    <span>🏪 店内リアルタイムマップ</span>
+                    <span style="font-size:0.75rem; color:var(--text-sub);">稼働状況</span>
+                </div>
+                
+                <div class="cafe-map">
+                    <div class="zone-title">🍳 厨房・バックヤード</div>
+                    <div class="kitchen-area">
+                        <span>${staffIcons || '👨‍🍳 (ワンマンワンオペ)'}</span>
+                        <span style="font-size:0.75rem; color:#4e342e; font-weight:bold;">
+                            ${state.equipment.coffeeMaker ? '☕マシン稼働中' : '手淹れ抽出'}
+                        </span>
+                    </div>
+
+                    <div class="counter-area">
+                        <span>🧾 レジ・カウンター</span>
+                        <span style="font-size:0.75rem;">${state.equipment.counter ? '🟢 オープン' : '🔴 未導入'}</span>
+                    </div>
+
+                    <div class="zone-title">🪑 客席（テーブル）</div>
+                    <div class="seating-area">
+        `;
+
+        state.tables.forEach(t => {
+            let content = '';
+            if (!t.occupied) {
+                content = `
+                    <div style="font-size:0.75rem; color:#a1887f;">空席</div>
+                    <div style="font-size:1.5rem; opacity:0.3; margin-top:4px;">🪑</div>
+                `;
+            } else if (t.state === 'waiting') {
+                content = `
+                    <div class="speech-bubble">💭 注文中...</div>
+                    <div class="customer-avatar">${t.customer}</div>
+                    <div style="font-size:0.7rem; font-weight:bold; color:var(--accent-brown); margin-top:2px;">着席中</div>
+                `;
+            } else if (t.state === 'eating') {
+                content = `
+                    <div class="speech-bubble">😋 ${t.item.icon} 美味しい！</div>
+                    <div class="customer-avatar">${t.customer}</div>
+                    <div style="font-size:0.7rem; font-weight:bold; color:var(--accent-green); margin-top:2px;">${t.item.name} 飲食中</div>
+                `;
+            }
+
+            html += `<div class="table-node">${content}</div>`;
+        });
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
+
+        view.innerHTML = html;
+    }
+
+    function updateSeats() {
+        state.tables.forEach(t => {
+            if (t.occupied) {
+                t.timer--;
+                if (t.state === 'waiting' && t.timer <= 0) {
+                    t.state = 'eating';
+                    t.timer = 4;
+                } else if (t.state === 'eating' && t.timer <= 0) {
+                    t.occupied = false;
+                    t.customer = null;
+                    t.item = null;
+                    t.state = 'empty';
+                }
+            }
+        });
+
+        if (state.currentTab === 'floor') {
+            renderFloorMap(document.getElementById('viewport'));
+        }
+    }
+
+    function customerLoop() {
+        if (!state.hasShop || !state.equipment.counter) return;
+
+        const emptyTable = state.tables.find(t => !t.occupied);
+        if (!emptyTable) return;
+
+        const available = state.recipes.filter(r => r.unlocked && r.stock > 0);
+        if (available.length === 0) return;
+
+        let chance = 0.5 * state.buzzMultiplier;
+        if (state.weather === '雨') chance *= 0.6;
+
+        if (Math.random() < chance) {
+            const target = available[Math.floor(Math.random() * available.length)];
+            
+            if (target.price > target.stdPrice * 1.4) {
+                addReview('⭐', `「${target.name}」の値段が高すぎます...`);
+                return;
+            }
+
+            target.stock -= 1;
+            emptyTable.occupied = true;
+            emptyTable.customer = CUSTOMER_AVATARS[Math.floor(Math.random() * CUSTOMER_AVATARS.length)];
+            emptyTable.item = target;
+            emptyTable.state = 'waiting';
+            emptyTable.timer = 2;
+
+            state.money += target.price;
+            state.totalRevenue += target.price;
+            state.reputation += 2;
+            showFloatText(`+${target.price.toLocaleString()}円`);
+
+            if (Math.random() < 0.25) {
+                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が美味しかったです！お店の雰囲気も素敵です。`);
+            }
+
+            renderHeader();
+        }
+    }
+
     function renderKitchen(view) {
         const supplier = document.createElement('div');
         supplier.className = 'card';
         supplier.style.background = '#fff8e1';
         supplier.innerHTML = `
-            <div class="card-title">📦 原材料の卸仕入れ</div>
+            <div class="card-title">📦 原材料仕入れ</div>
             <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span>☕ 珈琲豆 (50杯): 4,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.beans}</small></span>
@@ -524,7 +709,7 @@
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">👥 スタッフの採用・育成</div>
-                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:12px;">スタッフを採用すると混雑時でもスムーズに提供が行えます。</p>
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:12px;">スタッフを採用すると混雑時でもスムーズに配膳が行えます。</p>
                 
                 <div style="font-size:0.82rem; display:flex; flex-direction:column; gap:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
@@ -575,7 +760,7 @@
 
     function renderReport(view) {
         const grossProfit = state.totalRevenue - state.totalCost;
-        const netProfit = grossProfit - state.totalLaborCost - state.totalWasteCost;
+        const netProfit = grossProfit - state.totalLaborCost;
 
         view.innerHTML = `
             <div class="card">
@@ -639,7 +824,6 @@
         `;
     }
 
-    // STREAMING_CHUNK:Handlers and interactions...
     function startShop(name, concept, cost) {
         if (state.money >= cost) {
             state.money -= cost;
@@ -726,38 +910,6 @@
         if (r) r.unlocked = true;
     }
 
-    function customerLoop() {
-        if (!state.hasShop || !state.equipment.counter) return;
-
-        const available = state.recipes.filter(r => r.unlocked && r.stock > 0);
-        if (available.length === 0) return;
-
-        let chance = 0.45 * state.buzzMultiplier;
-        if (state.weather === '雨') chance *= 0.65;
-        if (state.weather === '猛暑') chance *= 0.8;
-
-        if (Math.random() < chance) {
-            const target = available[Math.floor(Math.random() * available.length)];
-            
-            if (target.price > target.stdPrice * 1.4) {
-                addReview('⭐', `「${target.name}」の値段が少し高すぎます...`);
-                return;
-            }
-
-            target.stock -= 1;
-            state.money += target.price;
-            state.totalRevenue += target.price;
-            state.reputation += 2;
-            showFloatText(`+${target.price.toLocaleString()}円`);
-
-            if (Math.random() < 0.25) {
-                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が最高でした！満足です。`);
-            }
-
-            render();
-        }
-    }
-
     function addReview(stars, text) {
         state.reviews.push({ stars, text, author: 'お客様' });
         if (state.reviews.length > 20) state.reviews.shift();
@@ -785,4 +937,3 @@
 </script>
 </body>
 </html>
-```eof
