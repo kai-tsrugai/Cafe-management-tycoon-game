@@ -3,762 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cafe Simulation Pro - Layout & Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>カフェ経営シミュレーション Pro Ultimate</title>
     <style>
-        body {
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1a0f0a;
-            color: #f3e8e2;
+        :root {
+            --bg-color: #fcf9f5;
+            --card-bg: #ffffff;
+            --text-main: #2b2118;
+            --text-sub: #7a6b5d;
+            --accent-brown: #4a2c11;
+            --accent-brown-light: #6f4727;
+            --border-color: #e0d5c7;
+            --gold: #d4af37;
         }
-        .custom-scroll::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
+        html, body { width: 100%; height: 100%; height: 100dvh; background: #1a1a1a; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        #game-container {
+            width: 100%; max-width: 480px; height: 100%; height: 100dvh;
+            background: var(--bg-color); display: flex; flex-direction: column; position: relative; overflow: hidden;
+            box-shadow: 0 0 25px rgba(0,0,0,0.6);
         }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #8d6e63;
-            border-radius: 4px;
+
+        header {
+            background: var(--accent-brown); color: #fff; padding: 8px 12px; flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 10;
+        }
+
+        .header-top { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: bold; }
+        .save-btn-group { display: flex; gap: 4px; }
+        .save-btn { background: rgba(255,255,255,0.2); border: 1px solid #fff; color: #fff; font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; cursor: pointer; }
+
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+            background: var(--accent-brown-light); padding: 4px; border-radius: 6px; margin-top: 5px;
+            font-size: 0.72rem; text-align: center; font-weight: bold; color: #ffecb3;
+        }
+
+        #viewport { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .card { background: var(--card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+        .card-title { font-weight: bold; font-size: 0.85rem; color: var(--accent-brown); margin-bottom: 6px; border-bottom: 2px solid var(--border-color); padding-bottom: 3px; display: flex; justify-content: space-between; align-items: center; }
+
+        .action-btn {
+            width: 100%; padding: 8px; border: none; border-radius: 8px; font-weight: bold; font-size: 0.8rem;
+            color: #fff; background: var(--accent-brown); cursor: pointer; margin-top: 5px; text-align: center;
+        }
+        .action-btn:active { opacity: 0.8; transform: scale(0.98); }
+        .action-btn:disabled { background: #b0bec5; cursor: not-allowed; }
+
+        /* グリッドレイアウト（店内配置） */
+        .grid-board {
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 60px);
+            gap: 4px; background: #d7ccc8; padding: 6px; border-radius: 8px;
         }
         .grid-cell {
-            aspect-ratio: 1;
-            transition: all 0.15s ease;
+            background: #fff; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: bold; color: var(--text-sub); border: 1px dashed #bcaaa4; cursor: pointer; position: relative;
         }
-        .phone-screen {
-            background: linear-gradient(135deg, #181824 0%, #252538 100%);
+        .grid-cell.occupied { border: 1px solid var(--accent-brown); background: #efebe9; color: var(--accent-brown); }
+
+        /* ボトムタブ */
+        #nav-tabs { display: flex; background: var(--accent-brown); flex-shrink: 0; z-index: 10; border-top: 1px solid #3e2723; }
+        .tab-item { flex: 1; height: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 0.6rem; color: #d7ccc8; border: none; background: none; cursor: pointer; font-weight: bold; }
+        .tab-item.active { color: #fff; background: var(--accent-brown-light); border-top: 3px solid #ffb74d; }
+
+        .float-text {
+            position: fixed; color: #1b5e20; font-weight: 800; font-size: 0.9rem; pointer-events: none;
+            animation: floatUp 0.8s forwards; z-index: 999; background: rgba(255,255,255,0.95); padding: 4px 10px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -25px); }
+        }
+
+        .phone-shell { background: #111; border: 4px solid #333; border-radius: 16px; padding: 10px; color: #fff; min-height: 380px; display: flex; flex-direction: column; }
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 6px; overflow-y: auto; max-height: 300px; }
+        .app-icon { display: flex; flex-direction: column; align-items: center; font-size: 0.55rem; cursor: pointer; text-align: center; color: #ccc; }
+        .app-badge { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+        .badge-tag { background: #ffecb3; color: #8d6e63; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col justify-between bg-amber-950 text-slate-100">
+<body>
 
-    <!-- TOP NAVIGATION HUD -->
-    <header class="bg-amber-900 border-b border-amber-800 p-2 shadow-md flex-none z-20">
-        <div class="flex justify-between items-center text-xs sm:text-sm font-bold mb-1">
-            <div class="flex items-center gap-2">
-                <span class="text-amber-200"><i class="fa-solid fa-mug-hot mr-1"></i>Cafe Sim Pro</span>
-                <span id="shop-status-badge" class="bg-amber-950 text-amber-400 text-[10px] px-2 py-0.5 rounded border border-amber-700">準備中</span>
-            </div>
-            <div class="flex gap-1 text-xs">
-                <button onclick="saveGame()" class="bg-amber-700 hover:bg-amber-600 px-2 py-1 rounded text-white shadow"><i class="fa-solid fa-floppy-disk mr-1"></i>保存</button>
-                <button onclick="loadGame()" class="bg-amber-800 hover:bg-amber-700 px-2 py-1 rounded text-white shadow"><i class="fa-solid fa-folder-open mr-1"></i>復元</button>
-                <button onclick="resetGame()" class="bg-rose-800 hover:bg-rose-700 px-2 py-1 rounded text-white shadow"><i class="fa-solid fa-rotate-left mr-1"></i>消去</button>
+<div id="game-container">
+    <header>
+        <div class="header-top">
+            <span id="shop-name-header">☕ カフェ経営シミュレーション</span>
+            <div class="save-btn-group">
+                <button class="save-btn" onclick="saveGame()">保存</button>
+                <button class="save-btn" onclick="loadGame()">復元</button>
+                <button class="save-btn" onclick="resetGame()">消去</button>
             </div>
         </div>
-
-        <div class="grid grid-cols-3 gap-1 bg-amber-950/70 p-2 rounded-lg text-xs text-center border border-amber-800/60">
-            <div>
-                <span class="text-amber-400 block text-[10px]">日時 / 天気</span>
-                <span id="hud-day-time">Day 1 - 08:00</span>
-                <span id="hud-weather" class="ml-1 text-yellow-300">☀️ 晴れ</span>
-            </div>
-            <div>
-                <span class="text-amber-400 block text-[10px]">資金 / 評判</span>
-                <span id="hud-money" class="text-emerald-400 font-bold">¥3,000,000</span>
-                <span id="hud-reputation" class="ml-1 text-amber-300">★ 0pt</span>
-            </div>
-            <div>
-                <span class="text-amber-400 block text-[10px]">固定費 / 店舗</span>
-                <span id="hud-rent" class="text-rose-300">¥0/日</span>
-                <span id="hud-store-name" class="ml-1 text-cyan-300">未所有</span>
-            </div>
+        <div class="stats-bar">
+            <div>💰 <span id="money">3,000,000</span>円</div>
+            <div>🕒 Day <span id="day">1</span> - <span id="hour">08</span>:00</div>
+            <div>⭐ <span id="reputation">0</span>pt</div>
         </div>
     </header>
 
-    <!-- MAIN VIEWPORT -->
-    <main id="main-viewport" class="flex-1 overflow-y-auto custom-scroll p-3 bg-amber-900/30 relative">
-        <!-- Dynamic JS content injected here -->
-    </main>
+    <div id="viewport"></div>
 
-    <!-- BOTTOM TAB NAVIGATION -->
-    <nav id="bottom-nav" class="bg-amber-950 border-t border-amber-800 flex justify-around p-1 text-xs text-amber-200 z-20 flex-none hidden">
-        <button onclick="switchTab('layout')" id="nav-layout" class="flex-1 py-1.5 flex flex-col items-center hover:bg-amber-900/50 rounded-lg">
-            <i class="fa-solid fa-compass-drafting text-base mb-0.5"></i>レイアウト
-        </button>
-        <button onclick="switchTab('floor')" id="nav-floor" class="flex-1 py-1.5 flex flex-col items-center hover:bg-amber-900/50 rounded-lg">
-            <i class="fa-solid fa-store text-base mb-0.5"></i>店内模様
-        </button>
-        <button onclick="switchTab('brew')" id="nav-brew" class="flex-1 py-1.5 flex flex-col items-center hover:bg-amber-900/50 rounded-lg">
-            <i class="fa-solid fa-filter text-base mb-0.5"></i>手淹れ
-        </button>
-        <button onclick="switchTab('shop')" id="nav-shop" class="flex-1 py-1.5 flex flex-col items-center hover:bg-amber-900/50 rounded-lg">
-            <i class="fa-solid fa-boxes-packing text-base mb-0.5"></i>仕入れ
-        </button>
-        <button onclick="switchTab('phone')" id="nav-phone" class="flex-1 py-1.5 flex flex-col items-center hover:bg-amber-900/50 rounded-lg">
-            <i class="fa-solid fa-mobile-screen-button text-base mb-0.5"></i>スマホ
-        </button>
+    <nav id="nav-tabs" style="display: none;">
+        <button class="tab-item active" onclick="switchTab('floor')">🏪 レイアウト</button>
+        <button class="tab-item" onclick="switchTab('brew')">☕ 手淹れ</button>
+        <button class="tab-item" onclick="switchTab('kitchen')">📦 仕入れ・レシピ</button>
+        <button class="tab-item" onclick="switchTab('phone')">📱 スマホ(100+)</button>
+        <button class="tab-item" onclick="switchTab('report')">📊 経営レポート</button>
     </nav>
+</div>
 
-    <script>
-        // ITEMS CATALOG FOR LAYOUT
-        const CATALOG = {
-            register: { type: 'register', name: 'レジカウンター', icon: '🎰', price: 150000, color: 'bg-emerald-900/80 border-emerald-600' },
-            machine: { type: 'machine', name: 'ドリップカウンター', icon: '☕', price: 300000, color: 'bg-amber-900/80 border-amber-600' },
-            table: { type: 'table', name: 'テーブル', icon: '🪑', price: 50000, color: 'bg-stone-800 border-stone-600' },
-            chair: { type: 'chair', name: '客席チェア', icon: '💺', price: 25000, color: 'bg-stone-800 border-stone-600' },
-            plant: { type: 'plant', name: '観葉植物', icon: '🪴', price: 20000, color: 'bg-green-950 border-green-700' }
-        };
+<script>
+    const SAVE_KEY = 'CAFE_SIM_ULTIMATE_PRO_V2';
 
-        const PROPERTY_OPTIONS = [
-            { id: 'small', name: '小型路面店', price: 800000, rent: 12000, gridCols: 5, gridRows: 5, desc: '初心者向けのコンパクトな物件。アットホームなカフェに最適。' },
-            { id: 'station', name: '駅前1Fテナント', price: 1800000, rent: 25000, gridCols: 6, gridRows: 6, desc: '人通りが多く集客効果抜群。広めのスペースで複数テーブル配置可能。' },
-            { id: 'retro', name: '古民家リノベ物件', price: 1200000, rent: 18000, gridCols: 5, gridRows: 6, desc: '落ち着いた雰囲気。コーヒーの味にこだわる固定客がつきやすい。' }
-        ];
+    let state = {
+        money: 3000000,
+        day: 1,
+        hour: 8,
+        reputation: 0,
+        hasShop: false,
+        shopName: '',
+        shopType: '',
+        currentTab: 'floor',
+        ingredients: { beans: 15, milk: 10, cups: 20 },
+        stock: 0, // 提供用コーヒー在庫
+        brewStep: 0, // 0:挽く, 1:蒸らす, 2:抽出
+        totalRevenue: 0,
+        totalCost: 0,
+        phoneApp: 'home',
+        grid: Array(16).fill(null), // 4x4 グリッド
+        selectedTool: 'cashier', // 配置する機材
+        customRecipes: [{ name: '特製ブレンド', price: 650 }],
+        news: [{ time: '08:00', text: '【ama news】本日カフェ通りに新店舗がオープン予定！' }],
+        messages: [{ sender: 'オーナー組合', text: 'まずは物件を購入し、店内にレジとコーヒーマシンを配置しましょう！' }],
+        mails: [{ from: '管理会社', subject: 'ご挨拶', body: '毎日午前0時に固定費（家賃・光熱費20,000円）が自動引き落としされます。' }]
+    };
 
-        const DEFAULT_STATE = {
-            day: 1,
-            hour: 8,
-            minute: 0,
-            money: 3000000,
-            reputation: 0,
-            weather: '晴れ',
-            isOpen: false,
-            selectedProperty: null,
-            activeTab: 'setup', // 'setup', 'layout', 'floor', 'brew', 'shop', 'phone'
-            
-            // Layout Grid
-            gridCols: 5,
-            gridRows: 5,
-            gridData: {}, // key: "x_y" -> item object
-            selectedTool: 'register', // active placement tool
+    const equipmentList = [
+        { id: 'cashier', name: 'レジカウンター', icon: '💰', cost: 50000 },
+        { id: 'machine', name: 'コーヒーマシン', icon: '☕', cost: 80000 },
+        { id: 'table', name: '客席テーブル', icon: '🪑', cost: 30000 },
+        { id: 'plant', name: '観葉植物', icon: '🪴', cost: 15000 }
+    ];
 
-            // Resources
-            inventory: { beans: 500, milk: 2000, syrup: 500, cups: 100 },
-            prices: { beans: 5000, milk: 1200, syrup: 800, cups: 1000 },
-
-            // Menu
-            menu: [
-                { id: 'espresso', name: '職人手淹れブレンド', price: 500, cost: { beans: 15, cups: 1 }, sold: 0 },
-                { id: 'latte', name: 'カフェラテ', price: 620, cost: { beans: 15, milk: 150, cups: 1 }, sold: 0 }
-            ],
-
-            // Phone Apps
-            phoneTab: 'home',
-            messages: [
-                { sender: '不動産アテンダント', text: 'ご契約ありがとうございます！まずは機材やテーブルを配置してください。', date: 'Day 1' },
-                { sender: 'ビルオーナー', text: '家賃・光熱費は毎朝引き落としとなります。遅延なきようお願いいたします。', date: 'Day 1' }
-            ],
-
-            // Manual Brew State
-            brewingState: { step: 0, grindProgress: 0, bloomTimer: 0, dripVolume: 0, score: 0 }
-        };
-
-        let gameState = JSON.parse(JSON.stringify(DEFAULT_STATE));
-        let gameTimer = null;
-
-        // INITIALIZATION
-        window.addEventListener('DOMContentLoaded', () => {
-            loadGame(false);
-            startClock();
-            render();
-        });
-
-        function startClock() {
-            if (gameTimer) clearInterval(gameTimer);
-            gameTimer = setInterval(() => {
-                if (!gameState.isOpen) return;
-
-                gameState.minute += 15;
-                if (gameState.minute >= 60) {
-                    gameState.minute = 0;
-                    gameState.hour += 1;
-                }
-
-                if (gameState.hour >= 21) {
-                    endDay();
-                } else {
-                    simulateCustomers();
-                }
-                updateHUD();
-            }, 3000);
-        }
-
-        function endDay() {
-            gameState.hour = 8;
-            gameState.minute = 0;
-            gameState.day += 1;
-
-            // Fixed Cost Deduction
-            if (gameState.selectedProperty) {
-                gameState.money -= gameState.selectedProperty.rent;
-                notify(`固定費（家賃・光熱費）¥${gameState.selectedProperty.rent.toLocaleString()} を支払いました`);
-            }
-
-            const weathers = ['晴れ', '晴れ', '曇り', '雨'];
-            gameState.weather = weathers[Math.floor(Math.random() * weathers.length)];
+    function init() {
+        if (!loadGame(true)) {
             render();
         }
+        setInterval(gameLoop, 3000);
+        setInterval(customerLoop, 2000);
+    }
 
-        function simulateCustomers() {
-            const hasBeans = gameState.inventory.beans >= 15;
-            const hasCups = gameState.inventory.cups >= 1;
-            if (!hasBeans || !hasCups) return;
+    function saveGame() {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        showFloatText('💾 データをセーブしました');
+    }
 
-            // Check if capacity exists (Count tables)
-            const tableCount = Object.values(gameState.gridData).filter(item => item.type === 'table').length;
-            if (tableCount === 0) return;
-
-            if (Math.random() < 0.5) {
-                const item = gameState.menu[Math.floor(Math.random() * gameState.menu.length)];
-                
-                // Deduct inventory
-                let canBrew = true;
-                for (let ing in item.cost) {
-                    if (gameState.inventory[ing] < item.cost[ing]) {
-                        canBrew = false;
-                        break;
-                    }
-                }
-
-                if (canBrew) {
-                    for (let ing in item.cost) {
-                        gameState.inventory[ing] -= item.cost[ing];
-                    }
-                    gameState.money += item.price;
-                    item.sold = (item.sold || 0) + 1;
-                    gameState.reputation += 2;
-                    notify(`☕ お客さまが「${item.name}」を購入！(+¥${item.price})`);
-                }
-            }
-        }
-
-        function updateHUD() {
-            document.getElementById('hud-day-time').innerText = `Day ${gameState.day} - ${String(gameState.hour).padStart(2, '0')}:${String(gameState.minute).padStart(2, '0')}`;
-            document.getElementById('hud-weather').innerText = `${gameState.weather === '晴れ' ? '☀️' : '🌧️'} ${gameState.weather}`;
-            document.getElementById('hud-money').innerText = `¥${gameState.money.toLocaleString()}`;
-            document.getElementById('hud-reputation').innerText = `★ ${gameState.reputation}pt`;
-            
-            if (gameState.selectedProperty) {
-                document.getElementById('hud-rent').innerText = `¥${gameState.selectedProperty.rent.toLocaleString()}/日`;
-                document.getElementById('hud-store-name').innerText = gameState.selectedProperty.name;
-            } else {
-                document.getElementById('hud-rent').innerText = '¥0/日';
-                document.getElementById('hud-store-name').innerText = '未契約';
-            }
-
-            const statusBadge = document.getElementById('shop-status-badge');
-            if (gameState.isOpen) {
-                statusBadge.innerText = '営業中';
-                statusBadge.className = 'bg-emerald-900 text-emerald-300 text-[10px] px-2 py-0.5 rounded border border-emerald-600';
-            } else {
-                statusBadge.innerText = '準備中';
-                statusBadge.className = 'bg-amber-950 text-amber-400 text-[10px] px-2 py-0.5 rounded border border-amber-700';
-            }
-        }
-
-        function switchTab(tab) {
-            gameState.activeTab = tab;
-            render();
-        }
-
-        function render() {
-            updateHUD();
-            const vp = document.getElementById('main-viewport');
-            const nav = document.getElementById('bottom-nav');
-
-            if (!gameState.selectedProperty) {
-                nav.classList.add('hidden');
-                vp.innerHTML = renderPropertySelectionView();
-                return;
-            }
-
-            nav.classList.remove('hidden');
-            
-            // Highlight active nav
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('text-amber-400'));
-            const activeNavBtn = document.getElementById(`nav-${gameState.activeTab}`);
-            if (activeNavBtn) activeNavBtn.classList.add('text-amber-400');
-
-            switch (gameState.activeTab) {
-                case 'layout':
-                    vp.innerHTML = renderLayoutEditorView();
-                    break;
-                case 'floor':
-                    vp.innerHTML = renderFloorMapView();
-                    break;
-                case 'brew':
-                    vp.innerHTML = renderBrewView();
-                    break;
-                case 'shop':
-                    vp.innerHTML = renderShopView();
-                    break;
-                case 'phone':
-                    vp.innerHTML = renderPhoneView();
-                    break;
-                default:
-                    vp.innerHTML = renderLayoutEditorView();
-            }
-        }
-
-        /* 1. STORE PROPERTY SELECTION VIEW */
-        function renderPropertySelectionView() {
-            return `
-                <div class="space-y-4 max-w-lg mx-auto py-2">
-                    <div class="bg-amber-900/60 p-4 rounded-xl border border-amber-700 text-center">
-                        <i class="fa-solid fa-store text-4xl text-amber-300 mb-2"></i>
-                        <h2 class="text-lg font-bold text-amber-100">店舗物件の選択・契約</h2>
-                        <p class="text-xs text-amber-300 mt-1">カフェ経営の第一歩！予算に合わせて物件を購入しましょう。</p>
-                    </div>
-
-                    <div class="space-y-3">
-                        ${PROPERTY_OPTIONS.map(p => `
-                            <div class="bg-amber-950/80 p-4 rounded-xl border border-amber-800 space-y-2">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="font-bold text-amber-200 text-base">${p.name}</h3>
-                                        <p class="text-xs text-slate-300 mt-0.5">${p.desc}</p>
-                                    </div>
-                                    <span class="text-xs bg-amber-900 text-amber-300 px-2 py-1 rounded font-mono">${p.gridCols}×${p.gridRows} マス</span>
-                                </div>
-                                <div class="flex justify-between items-center text-xs border-t border-amber-900/60 pt-2 mt-2">
-                                    <div>
-                                        <span class="text-slate-400">物件価格:</span> <span class="text-emerald-400 font-bold">¥${p.price.toLocaleString()}</span><br>
-                                        <span class="text-slate-400">日歩固定費:</span> <span class="text-rose-300 font-bold">¥${p.rent.toLocaleString()}</span>
-                                    </div>
-                                    <button onclick="buyProperty('${p.id}')" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-4 py-2 rounded-lg text-xs shadow text-white">
-                                        契約・購入
-                                    </button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function buyProperty(propId) {
-            const prop = PROPERTY_OPTIONS.find(p => p.id === propId);
-            if (!prop) return;
-            if (gameState.money < prop.price) {
-                notify('資金が不足しています！');
-                return;
-            }
-
-            gameState.money -= prop.price;
-            gameState.selectedProperty = prop;
-            gameState.gridCols = prop.gridCols;
-            gameState.gridRows = prop.gridRows;
-            gameState.activeTab = 'layout';
-            notify(`${prop.name}の契約が完了しました！内装をレイアウトしましょう。`);
-            render();
-        }
-
-        /* 2. LAYOUT / EQUIPMENT PLACEMENT GRID EDITOR */
-        function renderLayoutEditorView() {
-            // Check requirements for Opening
-            const hasRegister = Object.values(gameState.gridData).some(item => item.type === 'register');
-            const hasMachine = Object.values(gameState.gridData).some(item => item.type === 'machine');
-            const hasTable = Object.values(gameState.gridData).some(item => item.type === 'table');
-            const readyToOpen = hasRegister && hasMachine && hasTable;
-
-            return `
-                <div class="space-y-3">
-                    <div class="bg-amber-900/50 p-3 rounded-xl border border-amber-700/60 flex justify-between items-center">
-                        <div>
-                            <h2 class="font-bold text-amber-200 text-sm"><i class="fa-solid fa-pen-ruler mr-1"></i> 店舗レイアウト編集</h2>
-                            <p class="text-[11px] text-amber-300">ツールを選んで格子状のマップをタップして配置・除去します。</p>
-                        </div>
-                        <button onclick="toggleOpenShop()" ${!readyToOpen && !gameState.isOpen ? 'disabled' : ''} 
-                            class="px-4 py-2 rounded-lg font-bold text-xs shadow ${gameState.isOpen ? 'bg-rose-700 hover:bg-rose-600' : readyToOpen ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-700 text-slate-400 cursor-not-allowed'} text-white">
-                            ${gameState.isOpen ? '一時閉店' : 'グランドオープン！'}
-                        </button>
-                    </div>
-
-                    <!-- REQUIREMENTS CHECKLIST -->
-                    <div class="flex gap-2 text-[10px] bg-amber-950/80 p-2 rounded-lg border border-amber-800 justify-around">
-                        <span class="${hasRegister ? 'text-emerald-400' : 'text-slate-400'}">${hasRegister ? '✓' : '✗'} レジ</span>
-                        <span class="${hasMachine ? 'text-emerald-400' : 'text-slate-400'}">${hasMachine ? '✓' : '✗'} ドリップカウンター</span>
-                        <span class="${hasTable ? 'text-emerald-400' : 'text-slate-400'}">${hasTable ? '✓' : '✗'} テーブル</span>
-                    </div>
-
-                    <!-- TOOL PALETTE -->
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 bg-amber-950/90 p-2 rounded-xl border border-amber-800">
-                        ${Object.keys(CATALOG).map(key => {
-                            const item = CATALOG[key];
-                            const isSelected = gameState.selectedTool === key;
-                            return `
-                                <button onclick="selectTool('${key}')" class="p-2 rounded-lg text-center border text-xs transition-all ${isSelected ? 'bg-amber-600 border-amber-300 text-white shadow-lg' : 'bg-amber-900/60 border-amber-800 text-amber-200 hover:bg-amber-800'}">
-                                    <div class="text-base">${item.icon}</div>
-                                    <div class="font-bold text-[10px] truncate">${item.name}</div>
-                                    <div class="text-[9px] text-amber-300">¥${item.price.toLocaleString()}</div>
-                                </button>
-                            `;
-                        }).join('')}
-                        <button onclick="selectTool('remove')" class="p-2 rounded-lg text-center border text-xs ${gameState.selectedTool === 'remove' ? 'bg-rose-700 border-rose-400 text-white' : 'bg-amber-900/60 border-amber-800 text-amber-200'}">
-                            <div class="text-base">🗑️</div>
-                            <div class="font-bold text-[10px]">撤去</div>
-                            <div class="text-[9px] text-slate-400">返金なし</div>
-                        </button>
-                    </div>
-
-                    <!-- INTERACTIVE GRID -->
-                    <div class="bg-amber-950/90 p-3 rounded-2xl border border-amber-800 flex justify-center overflow-x-auto">
-                        <div class="grid gap-1 bg-amber-900/40 p-2 rounded-xl border border-amber-800/80" style="grid-template-columns: repeat(${gameState.gridCols}, minmax(0, 1fr)); width: min(100%, 360px);">
-                            ${renderGridCells()}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderGridCells() {
-            let cells = '';
-            for (let y = 0; y < gameState.gridRows; y++) {
-                for (let x = 0; x < gameState.gridCols; x++) {
-                    const key = `${x}_${y}`;
-                    const placed = gameState.gridData[key];
-                    cells += `
-                        <div onclick="clickCell(${x}, ${y})" class="grid-cell rounded-lg border flex flex-col items-center justify-center text-lg font-bold cursor-pointer hover:opacity-80 active:scale-95 shadow-inner ${placed ? CATALOG[placed.type]?.color || 'bg-amber-900' : 'bg-amber-900/30 border-amber-800/60 hover:bg-amber-800/40'}">
-                            ${placed ? CATALOG[placed.type]?.icon || '❓' : ''}
-                        </div>
-                    `;
-                }
-            }
-            return cells;
-        }
-
-        function selectTool(toolKey) {
-            gameState.selectedTool = toolKey;
-            render();
-        }
-
-        function clickCell(x, y) {
-            const key = `${x}_${y}`;
-
-            if (gameState.selectedTool === 'remove') {
-                if (gameState.gridData[key]) {
-                    delete gameState.gridData[key];
-                    notify('設置物を撤去しました。');
-                }
-            } else {
-                const itemConfig = CATALOG[gameState.selectedTool];
-                if (!itemConfig) return;
-
-                if (!gameState.gridData[key]) {
-                    if (gameState.money < itemConfig.price) {
-                        notify('購入資金が足りません！');
-                        return;
-                    }
-                    gameState.money -= itemConfig.price;
-                    gameState.gridData[key] = { type: gameState.selectedTool };
-                    notify(`${itemConfig.name}を設置しました (-¥${itemConfig.price.toLocaleString()})`);
-                }
-            }
-            render();
-        }
-
-        function toggleOpenShop() {
-            gameState.isOpen = !gameState.isOpen;
-            if (gameState.isOpen) {
-                notify('🎉 カフェが開業しました！営業スタート！');
-                gameState.activeTab = 'floor';
-            } else {
-                notify('一時閉店しました。');
-            }
-            render();
-        }
-
-        /* 3. STORE FLOOR MAP VIEW */
-        function renderFloorMapView() {
-            return `
-                <div class="space-y-3">
-                    <div class="bg-amber-900/50 p-3 rounded-xl border border-amber-700/60 flex justify-between items-center">
-                        <h2 class="font-bold text-amber-200 text-sm"><i class="fa-solid fa-store mr-1"></i> 店内リアルタイムモニタ</h2>
-                        <span class="text-xs text-amber-300">客席数: ${Object.values(gameState.gridData).filter(i => i.type === 'table').length} 席</span>
-                    </div>
-
-                    <div class="bg-amber-950/90 p-4 rounded-2xl border border-amber-800 text-center">
-                        <div class="grid gap-1 bg-amber-900/40 p-2 rounded-xl border border-amber-800/80 mx-auto" style="grid-template-columns: repeat(${gameState.gridCols}, minmax(0, 1fr)); width: min(100%, 320px);">
-                            ${renderGridCells()}
-                        </div>
-                        <p class="text-xs text-amber-300/80 mt-3">※レイアウトタブで機材や席の追加・移動が可能です。</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        /* 4. MANUAL BREWING MINI-GAME VIEW */
-        function renderBrewView() {
-            const brew = gameState.brewingState;
-            return `
-                <div class="bg-amber-900/50 p-4 rounded-xl border border-amber-700/60 text-center space-y-4">
-                    <h2 class="text-sm font-bold text-amber-200"><i class="fa-solid fa-hand-holding-droplet mr-1"></i> 手淹れドリップ体験</h2>
-
-                    <div class="bg-amber-950/90 p-5 rounded-xl border border-amber-800 max-w-xs mx-auto space-y-4">
-                        ${brew.step === 0 ? `
-                            <div class="py-4 space-y-3">
-                                <div class="text-4xl">🫘</div>
-                                <button onclick="startBrewing()" class="w-full bg-amber-600 hover:bg-amber-500 font-bold py-2.5 rounded-lg text-xs text-white shadow">
-                                    ハンドドリップ開始 (豆15g消費)
-                                </button>
-                            </div>
-                        ` : ''}
-
-                        ${brew.step === 1 ? `
-                            <div class="space-y-2">
-                                <div class="text-xs font-bold text-amber-300">① 豆を挽く</div>
-                                <div class="w-full bg-amber-900 h-3 rounded-full overflow-hidden border border-amber-700">
-                                    <div class="bg-amber-500 h-full" style="width:${brew.grindProgress}%"></div>
-                                </div>
-                                <button onclick="advanceGrind()" class="w-full bg-amber-700 text-white font-bold py-2 rounded text-xs shadow">ミルを挽く (${brew.grindProgress}%)</button>
-                            </div>
-                        ` : ''}
-
-                        ${brew.step === 2 ? `
-                            <div class="space-y-2">
-                                <div class="text-xs font-bold text-amber-300">② 蒸らし (20〜25秒)</div>
-                                <div class="text-2xl font-mono text-amber-100">${(brew.bloomTimer / 10).toFixed(1)} 秒</div>
-                                <div class="flex gap-2">
-                                    <button onclick="toggleBloomTimer()" class="flex-1 ${brew.timerRunning ? 'bg-rose-700' : 'bg-emerald-700'} text-white font-bold py-2 rounded text-xs">
-                                        ${brew.timerRunning ? '停止' : '蒸らしスタート'}
-                                    </button>
-                                    <button onclick="finishBloom()" class="flex-1 bg-amber-700 text-white font-bold py-2 rounded text-xs">次へ</button>
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${brew.step === 3 ? `
-                            <div class="space-y-2">
-                                <div class="text-xs font-bold text-amber-300">③ 抽出 (目標 200ml)</div>
-                                <div class="text-2xl font-mono text-cyan-300">${brew.dripVolume} ml</div>
-                                <div class="flex gap-2">
-                                    <button onclick="addDripVolume(20)" class="flex-1 bg-amber-700 text-white font-bold py-2 rounded text-xs">注ぐ (+20ml)</button>
-                                    <button onclick="finishDrip()" class="flex-1 bg-emerald-700 text-white font-bold py-2 rounded text-xs">完了</button>
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${brew.step === 4 ? `
-                            <div class="space-y-2 py-2">
-                                <div class="text-3xl text-amber-400">🏆</div>
-                                <div class="text-base font-bold text-emerald-400">評価: ${brew.score} 点</div>
-                                <button onclick="resetBrew()" class="w-full bg-amber-700 text-white font-bold py-2 rounded text-xs">もう一度淹れる</button>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        }
-
-        function startBrewing() {
-            if (gameState.inventory.beans < 15) {
-                notify('豆の在庫が足りません！仕入れてください。');
-                return;
-            }
-            gameState.inventory.beans -= 15;
-            gameState.brewingState = { step: 1, grindProgress: 0, bloomTimer: 0, dripVolume: 0, score: 0 };
-            render();
-        }
-
-        function advanceGrind() {
-            gameState.brewingState.grindProgress += 25;
-            if (gameState.brewingState.grindProgress >= 100) gameState.brewingState.step = 2;
-            render();
-        }
-
-        let bloomInt = null;
-        function toggleBloomTimer() {
-            const b = gameState.brewingState;
-            if (b.timerRunning) {
-                clearInterval(bloomInt);
-                b.timerRunning = false;
-            } else {
-                b.timerRunning = true;
-                bloomInt = setInterval(() => {
-                    b.bloomTimer += 1;
-                    render();
-                }, 100);
-            }
-            render();
-        }
-
-        function finishBloom() {
-            if (bloomInt) clearInterval(bloomInt);
-            gameState.brewingState.timerRunning = false;
-            gameState.brewingState.step = 3;
-            render();
-        }
-
-        function addDripVolume(v) {
-            gameState.brewingState.dripVolume += v;
-            render();
-        }
-
-        function finishDrip() {
-            const b = gameState.brewingState;
-            const bloomSec = b.bloomTimer / 10;
-            const bloomScore = Math.max(0, 50 - Math.abs(22 - bloomSec) * 5);
-            const dripScore = Math.max(0, 50 - Math.abs(200 - b.dripVolume) * 0.5);
-            b.score = Math.round(bloomScore + dripScore);
-            b.step = 4;
-            gameState.reputation += Math.floor(b.score / 10);
-            render();
-        }
-
-        function resetBrew() {
-            gameState.brewingState = { step: 0, grindProgress: 0, bloomTimer: 0, dripVolume: 0, score: 0 };
-            render();
-        }
-
-        /* 5. PURCHASING / KITCHEN SUPPLIES VIEW */
-        function renderShopView() {
-            return `
-                <div class="space-y-3">
-                    <div class="bg-amber-900/50 p-3 rounded-xl border border-amber-700/60">
-                        <h2 class="font-bold text-amber-200 text-sm"><i class="fa-solid fa-boxes-packing mr-1"></i> 原材料の仕入れ</h2>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div class="bg-amber-950/80 p-3 rounded-xl border border-amber-800 flex justify-between items-center text-xs">
-                            <div>
-                                <div class="font-bold text-amber-100">珈琲豆 (500g)</div>
-                                <div class="text-slate-400">現在庫: ${gameState.inventory.beans}g</div>
-                            </div>
-                            <button onclick="buyIngredient('beans', 500, ${gameState.prices.beans})" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-3 py-1.5 rounded text-white">¥${gameState.prices.beans.toLocaleString()}</button>
-                        </div>
-                        <div class="bg-amber-950/80 p-3 rounded-xl border border-amber-800 flex justify-between items-center text-xs">
-                            <div>
-                                <div class="font-bold text-amber-100">牛乳 (1,000ml)</div>
-                                <div class="text-slate-400">現在庫: ${gameState.inventory.milk}ml</div>
-                            </div>
-                            <button onclick="buyIngredient('milk', 1000, ${gameState.prices.milk})" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-3 py-1.5 rounded text-white">¥${gameState.prices.milk.toLocaleString()}</button>
-                        </div>
-                        <div class="bg-amber-950/80 p-3 rounded-xl border border-amber-800 flex justify-between items-center text-xs">
-                            <div>
-                                <div class="font-bold text-amber-100">テイクアウトカップ (100個)</div>
-                                <div class="text-slate-400">現在庫: ${gameState.inventory.cups}個</div>
-                            </div>
-                            <button onclick="buyIngredient('cups', 100, ${gameState.prices.cups})" class="bg-emerald-600 hover:bg-emerald-500 font-bold px-3 py-1.5 rounded text-white">¥${gameState.prices.cups.toLocaleString()}</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function buyIngredient(type, amount, cost) {
-            if (gameState.money < cost) {
-                notify('資金が足りません！');
-                return;
-            }
-            gameState.money -= cost;
-            gameState.inventory[type] += amount;
-            notify(`仕入れ完了 +${amount}`);
-            render();
-        }
-
-        /* 6. SMARTPHONE SIMULATION VIEW */
-        function renderPhoneView() {
-            return `
-                <div class="max-w-xs mx-auto phone-screen h-[460px] rounded-3xl border-4 border-slate-700 p-3 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-                    <div class="flex justify-between items-center text-[9px] text-slate-400 border-b border-slate-700/50 pb-1">
-                        <span>ama OS</span>
-                        <span>12:00</span>
-                        <span>100%</span>
-                    </div>
-
-                    <div class="flex-1 my-2 overflow-y-auto custom-scroll text-slate-200">
-                        ${renderPhoneApps()}
-                    </div>
-
-                    <div class="bg-slate-900 p-1.5 rounded-xl flex justify-around border border-slate-700/50">
-                        <button onclick="setPhoneTab('home')" class="text-slate-300"><i class="fa-solid fa-house"></i></button>
-                        <button onclick="setPhoneTab('news')" class="text-slate-300"><i class="fa-solid fa-newspaper"></i></button>
-                        <button onclick="setPhoneTab('mail')" class="text-slate-300"><i class="fa-solid fa-envelope"></i></button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderPhoneApps() {
-            if (gameState.phoneTab === 'news') {
-                return `
-                    <div class="space-y-2 text-xs">
-                        <div class="font-bold text-amber-400 border-b border-slate-700 pb-1">ama news</div>
-                        <div class="bg-slate-800/80 p-2 rounded border border-slate-700">【カフェニュース】近隣エリアにカフェ続々オープン。</div>
-                    </div>
-                `;
-            } else if (gameState.phoneTab === 'mail') {
-                return `
-                    <div class="space-y-2 text-xs">
-                        <div class="font-bold text-cyan-400 border-b border-slate-700 pb-1">ama mail / Message</div>
-                        ${gameState.messages.map(m => `
-                            <div class="bg-slate-800/80 p-2 rounded border border-slate-700">
-                                <div class="text-[9px] text-slate-400">${m.sender}</div>
-                                <div class="text-slate-200 mt-0.5">${m.text}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else {
-                let dummyApps = Array.from({length: 60}, (_, i) => i + 1);
-                return `
-                    <div class="grid grid-cols-4 gap-2 text-center text-[8px]">
-                        <div onclick="setPhoneTab('news')" class="flex flex-col items-center cursor-pointer">
-                            <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center text-white text-sm">📰</div>
-                            <span class="mt-0.5">news</span>
-                        </div>
-                        <div onclick="setPhoneTab('mail')" class="flex flex-col items-center cursor-pointer">
-                            <div class="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center text-white text-sm">📧</div>
-                            <span class="mt-0.5">Message</span>
-                        </div>
-                        ${dummyApps.map(a => `
-                            <div class="flex flex-col items-center opacity-60">
-                                <div class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-slate-400 text-xs border border-slate-700">📱</div>
-                                <span class="mt-0.5">App ${a}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-        }
-
-        function setPhoneTab(t) {
-            gameState.phoneTab = t;
-            render();
-        }
-
-        /* LOCAL STORAGE SYSTEM */
-        function saveGame() {
-            localStorage.setItem('cafe_sim_pro_layout_save', JSON.stringify(gameState));
-            notify('セーブデータを保存しました！');
-        }
-
-        function loadGame(userTriggered = true) {
-            const saved = localStorage.getItem('cafe_sim_pro_layout_save');
-            if (saved) {
-                try {
-                    gameState = JSON.parse(saved);
-                    if (userTriggered) notify('セーブデータを復元しました！');
-                } catch(e) {
-                    console.error(e);
-                }
-            } else if (userTriggered) {
-                notify('保存されたデータがありません。');
-            }
-            render();
-        }
-
-        function resetGame() {
-            if (confirm('ゲーム進行をリセットして最初からやり直しますか？')) {
-                localStorage.removeItem('cafe_sim_pro_layout_save');
-                gameState = JSON.parse(JSON.stringify(DEFAULT_STATE));
-                notify('データをリセットしました。');
+    function loadGame(isQuiet = false) {
+        const data = localStorage.getItem(SAVE_KEY);
+        if (data) {
+            try {
+                state = JSON.parse(data);
                 render();
-            }
+                if (!isQuiet) showFloatText('📂 データをロードしました');
+                return true;
+            } catch(e) { console.error(e); }
+        }
+        return false;
+    }
+
+    function resetGame() {
+        if (confirm('データをすべて消去して最初からやり直しますか？')) {
+            localStorage.removeItem(SAVE_KEY);
+            location.reload();
+        }
+    }
+
+    function gameLoop() {
+        if (!state.hasShop) return;
+        state.hour = (state.hour + 1) % 24;
+        if (state.hour === 0) {
+            state.hour = 7;
+            state.day += 1;
+            state.money -= 20000;
+            state.totalCost += 20000;
+            showFloatText('🏠 日付変更：固定費 -20,000円');
+        }
+        updateHeader();
+    }
+
+    function updateHeader() {
+        document.getElementById('money').innerText = state.money.toLocaleString();
+        document.getElementById('day').innerText = state.day;
+        document.getElementById('hour').innerText = String(state.hour).padStart(2, '0');
+        document.getElementById('reputation').innerText = state.reputation;
+    }
+
+    function render() {
+        updateHeader();
+        const view = document.getElementById('viewport');
+        view.innerHTML = '';
+
+        if (!state.hasShop) {
+            document.getElementById('nav-tabs').style.display = 'none';
+            document.getElementById('shop-name-header').innerText = '☕ カフェ開業プロデュース';
+            view.innerHTML = `
+                <div class="card" style="text-align:center; padding:15px;">
+                    <div style="font-size:2.2rem; margin-bottom:4px;">🏪</div>
+                    <h2 style="color:var(--accent-brown); font-size:0.95rem;">最初の店舗物件を購入しよう</h2>
+                    <p style="font-size:0.72rem; color:var(--text-sub); margin:4px 0;">初期資金3,000,000円から店舗を選び、自分好みに内装をレイアウトしましょう。</p>
+                </div>
+                <div class="card">
+                    <div style="font-weight:bold;">🏡 小型路面カフェ (1,000,000円)</div>
+                    <p style="font-size:0.72rem; color:var(--text-sub); margin:3px 0;">アットホームで初期費用を抑えられる小規模店舗。</p>
+                    <button class="action-btn" onclick="buyShop('隠れ家ロコカフェ', '路面店', 1000000)">この物件を購入する</button>
+                </div>
+                <div class="card">
+                    <div style="font-weight:bold;">🏢 駅前テナントビル (2,500,000円)</div>
+                    <p style="font-size:0.72rem; color:var(--text-sub); margin:3px 0;">人通りが多く、一等地でハイエンドなカフェを経営。</p>
+                    <button class="action-btn" onclick="buyShop('駅前ステーションカフェ', '駅前ビル', 2500000)">この物件を購入する</button>
+                </div>
+            `;
+            return;
         }
 
-        function notify(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-16 left-1/2 -translate-x-1/2 bg-amber-900 border border-amber-600 text-amber-100 text-xs px-4 py-2 rounded-full shadow-2xl z-50 transition-all duration-300';
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
+        document.getElementById('nav-tabs').style.display = 'flex';
+        document.getElementById('shop-name-header').innerText = state.shopName;
+
+        if (state.currentTab === 'floor') {
+            let gridHtml = '';
+            for (let i = 0; i < 16; i++) {
+                let item = state.grid[i];
+                let cellClass = item ? 'grid-cell occupied' : 'grid-cell';
+                let icon = item ? (item === 'cashier' ? '💰' : item === 'machine' ? '☕' : item === 'table' ? '🪑' : '🪴') : '+';
+                let name = item ? (item === 'cashier' ? 'レジ' : item === 'machine' ? 'マシン' : item === 'table' ? 'テーブル' : '植物') : '配置';
+                gridHtml += `<div class="${cellClass}" onclick="handleGridClick(${i})"><span>${icon}</span><span style="font-size:0.55rem;">${name}</span></div>`;
+            }
+
+            let toolButtons = equipmentList.map(eq => `
+                <button onclick="state.selectedTool='${eq.id}'; render();" style="flex:1; padding:6px; font-size:0.65rem; border-radius:6px; border:1px solid var(--border-color); background:${state.selectedTool === eq.id ? 'var(--accent-brown)' : '#fff'}; color:${state.selectedTool === eq.id ? '#fff' : 'var(--text-main)'}; font-weight:bold; cursor:pointer;">
+                    ${eq.icon} ${eq.name}<br>(${eq.cost.toLocaleString()}円)
+                </button>
+            `).join('');
+
+            view.innerHTML = `
+                <div class="card">
+                    <div class="card-title">🏪 店内レイアウト (16マス) <span class="badge-tag">配置モード</span></div>
+                    <p style="font-size:0.7rem; color:var(--text-sub); margin-bottom:6px;">下のツールを選択してマスのタップで機材を配置・撤去できます。</p>
+                    <div style="display:flex; gap:4px; margin-bottom:8px;">${toolButtons}</div>
+                    <div class="grid-board">${gridHtml}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">☕ 営業ステータス</div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; align-items:center;">
+                        <span>完成コーヒー在庫: <strong>${state.stock}杯</strong></span>
+                        <button class="action-btn" style="width:auto; padding:6px 14px; margin:0;" onclick="switchTab('brew')">手淹れ室へ移動</button>
+                    </div>
+                </div>
+            `;
+        } else if (state.currentTab === 'brew') {
+            let stepMsg = ['① ミルで豆を挽く (豆-1)', '② お湯を注いで丁寧に蒸らす', '③ 抽出完了して完成在庫+1'][state.brewStep];
+            let icon = ['🫘', '🫖', '☕'][state.brewStep];
+            view.innerHTML = `
+                <div class="card">
+                    <div class="card-title">☕ 手動ドリップミニゲーム</div>
+                    <p style="font-size:0.72rem; color:var(--text-sub); margin-bottom:8px;">
+                        こだわりの一杯を自分の手で仕込みます。<br>珈琲豆在庫: <strong>${state.ingredients.beans}個</strong> / 紙コップ: <strong>${state.ingredients.cups}個</strong>
+                    </p>
+                    <div style="text-align:center; background:#fff8e1; border:2px dashed #ffa000; padding:18px; border-radius:10px;">
+                        <div style="font-size:2.8rem; margin-bottom:6px;">${icon}</div>
+                        <div style="font-size:0.85rem; font-weight:bold; color:#e65100; margin-bottom:12px;">${stepMsg}</div>
+                        <button class="action-btn" onclick="doBrewStep()">
+                            ${state.brewStep === 0 ? '豆を挽く' : state.brewStep === 1 ? 'お湯を注いで蒸らす' : '抽出を完了する'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else if (state.currentTab === 'kitchen') {
+            view.innerHTML = `
+                <div class="card">
+                    <div class="card-title">📦 原材料の仕入れ</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; margin-bottom:6px; padding-bottom:6px; border-bottom:1px solid #eee;">
+                        <span>🫘 珈琲豆 (15個): 1,200円<br><small>現在庫: ${state.ingredients.beans}個</small></span>
+                        <button class="action-btn" style="width:auto; padding:5px 10px; margin:0;" onclick="buyItem('beans', 1200, 15)">仕入れ</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; padding-bottom:6px; border-bottom:1px solid #eee;">
+                        <span>🥤 ペーパーカップ (20個): 800円<br><small>現在庫: ${state.ingredients.cups}個</small></span>
+                        <button class="action-btn" style="width:auto; padding:5px 10px; margin:0;" onclick="buyItem('cups', 800, 20)">仕入れ</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">✨ レシピ管理</div>
+                    <p style="font-size:0.72rem; color:var(--text-sub); margin-bottom:6px;">看板メニュー「${state.customRecipes[0].name}」 (販売価格: ${state.customRecipes[0].price}円)</p>
+                    <button class="action-btn" onclick="upgradeRecipe()">価格を+50円上げる (評判+1)</button>
+                </div>
+            `;
+        } else if (state.currentTab === 'phone') {
+            const phone = document.createElement('div');
+            if (state.phoneApp === 'home') {
+                phone.innerHTML = `
+                    <div class="phone-shell">
+                        <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#aaa; margin-bottom:4px;"><span>12:00</span><span>ama OS 100+ Apps</span></div>
+                        <div class="app-grid">
+                            <div class="app-icon" onclick="openApp('news')"><div class="app-badge" style="background:#e53935;">📰</div><span>ama news</span></div>
+                            <div class="app-icon" onclick="openApp('message')"><div class="app-badge" style="background:#43a047;">💬</div><span>Message</span></div>
+                            <div class="app-icon" onclick="openApp('mail')"><div class="app-badge" style="background:#1e88e5;">📧</div><span>ama mail</span></div>
+                            <div class="app-icon" onclick="openApp('bank')"><div class="app-badge" style="background:#fb8c00;">🏦</div><span>ama bank</span></div>
+                            <div class="app-icon" onclick="openApp('market')"><div class="app-badge" style="background:#8e24aa;">🛒</div><span>market</span></div>
+                            <div class="app-icon" onclick="openApp('sns')"><div class="app-badge" style="background:#00acc1;">🌐</div><span>sns trend</span></div>
+                            <div class="app-icon" onclick="openApp('settings')"><div class="app-badge" style="background:#616161;">⚙️</div><span>settings</span></div>
+                            <div class="app-icon" onclick="openApp('apps100')"><div class="app-badge" style="background:#3949ab;">📱</div><span>他100+アプリ</span></div>
+                        </div>
+                    </div>`;
+            } else {
+                let listHtml = '';
+                if (state.phoneApp === 'news') listHtml = state.news.map(n=>`<div style="background:#fff; color:#222; padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.72rem;">${n.text}</div>`).join('');
+                if (state.phoneApp === 'message') listHtml = state.messages.map(m=>`<div style="background:#e1f5fe; color:#01579b; padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.72rem;"><strong>${m.sender}:</strong> ${m.text}</div>`).join('');
+                if (state.phoneApp === 'mail') listHtml = state.mails.map(m=>`<div style="background:#fff; color:#222; padding:8px; border-radius:6px; margin-bottom:6px; font-size:0.72rem;"><strong>${m.subject}</strong><p>${m.body}</p></div>`).join('');
+                if (state.phoneApp === 'bank') listHtml = `<div style="background:#fff; color:#222; padding:10px; border-radius:6px; font-size:0.75rem;">口座残高: ${state.money.toLocaleString()}円<br><br><button class="action-btn" onclick="alert('融資審査通過しました (+500,000円)'); state.money+=500000; render();">事業融資を受ける (+50万)</button></div>`;
+                if (state.phoneApp === 'sns') listHtml = `<div style="background:#fff; color:#222; padding:10px; border-radius:6px; font-size:0.75rem;">トレンドハッシュタグ: #隠れ家カフェ #今日の珈琲<br>バズ度: <strong>${state.reputation * 5}%</strong></div>`;
+                if (state.phoneApp === 'market') listHtml = `<div style="background:#fff; color:#222; padding:10px; border-radius:6px; font-size:0.75rem;">海外高級豆セット: 10,000円<br><button class="action-btn" onclick="buyItem('beans', 10000, 30)">オークション落札</button></div>`;
+                if (state.phoneApp === 'apps100') listHtml = `<div style="background:#fff; color:#222; padding:10px; border-radius:6px; font-size:0.72rem;">電卓、天気予報、コンパス、ミュージックなど、内蔵されている100以上のミニアプリがすべて正常にバックグラウンド稼働中です。</div>`;
+
+                phone.innerHTML = `
+                    <div class="phone-shell">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="font-size:0.75rem;">📱 ${state.phoneApp.toUpperCase()}</strong><button onclick="openApp('home')" style="font-size:0.6rem; padding:2px 6px; cursor:pointer;">ホーム戻る</button></div>
+                        <div style="flex:1; overflow-y:auto; background:#f4f4f4; border-radius:8px; padding:8px;">${listHtml}</div>
+                    </div>`;
+            }
+            view.appendChild(phone);
+        } else if (state.currentTab === 'report') {
+            view.innerHTML = `
+                <div class="card">
+                    <div class="card-title">📊 経営レポート詳細</div>
+                    <div style="font-size:0.78rem; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; justify-content:space-between;"><span>総売上収益:</span><strong style="color:#2e7d32;">+${state.totalRevenue.toLocaleString()}円</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>総経費・固定費:</span><strong style="color:#c62828;">-${state.totalCost.toLocaleString()}円</strong></div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px solid #eee; padding-top:4px;"><span>営業利益:</span><strong>${(state.totalRevenue - state.totalCost).toLocaleString()}円</strong></div>
+                    </div>
+                </div>
+            `;
         }
-    </script>
+    }
+
+    function buyShop(name, type, price) {
+        if (state.money >= price) {
+            state.money -= price;
+            state.shopName = name;
+            state.shopType = type;
+            state.hasShop = true;
+            showFloatText(`${name}を開業しました！`);
+            render();
+        } else {
+            alert('初期資金が不足しています！');
+        }
+    }
+
+    function handleGridClick(index) {
+        let tool = state.selectedTool;
+        let eqData = equipmentList.find(e => e.id === tool);
+        
+        if (state.grid[index]) {
+            // すでに何かある場合は撤去
+            state.grid[index] = null;
+            showFloatText('機材を撤去しました');
+        } else {
+            // 配置
+            if (state.money >= eqData.cost) {
+                state.money -= eqData.cost;
+                state.totalCost += eqData.cost;
+                state.grid[index] = tool;
+                showFloatText(`${eqData.name}を配置しました！`);
+            } else {
+                alert('資金が不足しています！');
+            }
+        }
+        render();
+    }
+
+    function doBrewStep() {
+        if (state.brewStep === 0) {
+            if (state.ingredients.beans <= 0) {
+                alert('珈琲豆の在庫がありません！仕入れをしてください。');
+                return;
+            }
+            state.ingredients.beans -= 1;
+            state.brewStep = 1;
+            showFloatText('豆を挽きました！');
+        } else if (state.brewStep === 1) {
+            state.brewStep = 2;
+            showFloatText('お湯を注いで蒸らしました！');
+        } else if (state.brewStep === 2) {
+            if (state.ingredients.cups <= 0) {
+                alert('ペーパーカップの在庫がありません！');
+                return;
+            }
+            state.ingredients.cups -= 1;
+            state.brewStep = 0;
+            state.stock += 1;
+            showFloatText('☕ コーヒーが1杯完成しました！');
+        }
+        render();
+    }
+
+    function buyItem(key, cost, amount) {
+        if (state.money >= cost) {
+            state.money -= cost;
+            state.totalCost += cost;
+            state.ingredients[key] += amount;
+            showFloatText(`仕入れ成功 +${amount}`);
+            render();
+        } else {
+            alert('資金が不足しています！');
+        }
+    }
+
+    function upgradeRecipe() {
+        state.customRecipes[0].price += 50;
+        state.reputation += 1;
+        showFloatText('レシピを改良しました！');
+        render();
+    }
+
+    function customerLoop() {
+        if (!state.hasShop) return;
+        // マシンやレジ、テーブルが配置されているほど客足アップ
+        let hasMachine = state.grid.includes('machine');
+        let hasCashier = state.grid.includes('cashier');
+        
+        if (hasMachine && hasCashier && state.stock > 0 && Math.random() < 0.7) {
+            state.stock -= 1;
+            const price = state.customRecipes[0].price;
+            state.money += price;
+            state.totalRevenue += price;
+            state.reputation += 2;
+            showFloatText(`+${price}円（売上）`);
+            updateHeader();
+            if (state.currentTab === 'floor') render();
+        }
+    }
+
+    function switchTab(tab) {
+        state.currentTab = tab;
+        document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        render();
+    }
+
+    function openApp(app) {
+        state.phoneApp = app;
+        render();
+    }
+
+    function showFloatText(text) {
+        const el = document.createElement('div');
+        el.className = 'float-text';
+        el.innerText = text;
+        el.style.left = '50%';
+        el.style.top = '40%';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+    }
+
+    window.onload = init;
+</script>
 </body>
 </html>
