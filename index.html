@@ -3,20 +3,23 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>本格カフェ経営シミュレーション - 完全修正版</title>
-    <!-- STREAMING_CHUNK:Styling the interface... -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>モバイル専用 カフェ経営シミュレーション</title>
+    <!-- STREAMING_CHUNK:Styling the mobile-first layout... -->
     <style>
         :root {
-            --bg-color: #f4ede4;
+            --bg-color: #f7f3ee;
             --card-bg: #ffffff;
-            --text-main: #2d241e;
-            --text-sub: #6e5d4f;
-            --accent-brown: #5c3d2e;
+            --text-main: #2b2118;
+            --text-sub: #7a6b5d;
+            --accent-brown: #4a2c11;
+            --accent-brown-light: #6f4727;
             --accent-green: #2e7d32;
-            --accent-orange: #e65100;
+            --accent-amber: #e65100;
             --accent-red: #c62828;
-            --border-color: #d7ccc8;
+            --border-color: #e0d5c7;
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-area-top: env(safe-area-inset-top, 0px);
         }
 
         * {
@@ -25,91 +28,98 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", sans-serif;
         }
 
-        body {
-            background-color: #1a0f0a;
-            color: var(--text-main);
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: #0d0805;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            height: 100vh;
-            overflow: hidden;
         }
 
+        /* モバイルコンテナ */
         #game-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
+            height: 100%;
+            height: 100dvh;
             background: var(--bg-color);
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            max-height: 100vh;
             position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             overflow: hidden;
+            box-shadow: 0 0 25px rgba(0,0,0,0.6);
         }
 
         /* ヘッダー */
         header {
             background: var(--accent-brown);
             color: #ffffff;
-            padding: 10px 14px;
-            border-bottom: 3px solid #3e2723;
+            padding: calc(var(--safe-area-top) + 8px) 12px 8px 12px;
             shrink: 0;
-            z-index: 10;
+            z-index: 20;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.95rem;
-            font-weight: bold;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .env-bar {
             display: flex;
-            gap: 10px;
-            background: #3e2723;
-            padding: 4px 10px;
-            border-radius: 4px;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.25);
+            padding: 4px 8px;
+            border-radius: 6px;
             font-size: 0.75rem;
             margin-top: 6px;
-            color: #ffe0b2;
-            justify-content: space-between;
+            color: #ffecb3;
         }
 
         .stats-bar {
-            display: flex;
-            justify-content: space-around;
-            background: #4e342e;
-            padding: 8px;
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr 0.9fr;
+            gap: 4px;
+            background: var(--accent-brown-light);
+            padding: 6px 8px;
             border-radius: 6px;
             margin-top: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             color: #ffffff;
+            text-align: center;
         }
 
         /* スクロール可能なメインビュー領域 */
         #viewport {
-            flex: 1 1 auto;
+            flex: 1;
             padding: 12px;
             overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
         }
 
+        /* カードデザイン */
         .card {
             background: var(--card-bg);
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
             shrink: 0;
         }
@@ -117,55 +127,66 @@
         .card-title {
             font-weight: bold;
             font-size: 0.95rem;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 4px;
+            padding-bottom: 6px;
             color: var(--accent-brown);
         }
 
         .action-btn {
             width: 100%;
+            min-height: 44px;
             padding: 10px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #ffffff;
             background: var(--accent-brown);
             cursor: pointer;
-            margin-top: 6px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s, transform 0.1s;
         }
 
         .action-btn:active {
-            opacity: 0.8;
+            transform: scale(0.98);
+            opacity: 0.9;
         }
 
         .action-btn:disabled {
             background: #b0bec5 !important;
+            opacity: 0.7;
+            transform: none;
             cursor: not-allowed;
         }
 
         .price-box {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin: 6px 0;
-            background: #f5f5f5;
-            padding: 6px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+            justify-content: space-between;
+            margin: 8px 0;
+            background: #f5f0eb;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
         }
 
         .price-input {
-            width: 70px;
-            padding: 4px;
+            width: 80px;
+            padding: 6px;
             font-weight: bold;
             text-align: right;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: #fff;
         }
 
         /* ボトムナビゲーション */
@@ -174,64 +195,85 @@
             background: var(--accent-brown);
             overflow-x: auto;
             shrink: 0;
-            z-index: 10;
-            border-top: 2px solid #3e2723;
+            z-index: 20;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: var(--safe-area-bottom);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #nav-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-item {
             flex: 1;
-            min-width: 65px;
-            padding: 12px 4px;
-            text-align: center;
-            font-size: 0.72rem;
+            min-width: 68px;
+            height: 52px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.68rem;
             font-weight: bold;
             color: #d7ccc8;
             border: none;
             background: none;
             cursor: pointer;
             white-space: nowrap;
+            gap: 2px;
+        }
+
+        .tab-item span.icon {
+            font-size: 1.1rem;
         }
 
         .tab-item.active {
             color: #ffffff;
-            background: #3e2723;
-            border-bottom: 3px solid #ffb74d;
+            background: var(--accent-brown-light);
+            border-top: 3px solid #ffb74d;
         }
 
+        /* フローティング通知テキスト */
         .float-text {
             position: fixed;
-            color: #2e7d32;
-            font-weight: bold;
-            font-size: 1.1rem;
+            color: #1b5e20;
+            font-weight: 800;
+            font-size: 1.15rem;
             pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
+            animation: floatUp 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
             z-index: 999;
-            text-shadow: 0 1px 2px #fff;
+            text-shadow: 0 1px 3px #ffffff;
+            background: rgba(255,255,255,0.85);
+            padding: 4px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-30px); }
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+            20% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -20px) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -35px) scale(0.95); }
         }
 
         .review-box {
             background: #fffde7;
             border: 1px solid #fff59d;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 0.8rem;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.82rem;
         }
     </style>
 </head>
 <body>
 
-<!-- STREAMING_CHUNK:Initializing HTML layout... -->
+<!-- STREAMING_CHUNK:Initializing Mobile HTML Structure... -->
 <div id="game-container">
     <header>
         <div class="header-top">
-            <span id="shop-name">準備中...</span>
-            <span id="concept-tag" style="font-size:0.75rem; background:#3e2723; padding:2px 6px; border-radius:4px;">コンセプト未設定</span>
+            <span id="shop-name">☕ Cafe Simulation</span>
+            <span id="concept-tag" style="font-size:0.7rem; background:rgba(255,255,255,0.15); padding:2px 8px; border-radius:12px;">準備中</span>
         </div>
         <div class="env-bar">
             <span>🕒 <span id="time-display">08:00 (モーニング)</span></span>
@@ -241,30 +283,42 @@
         <div class="stats-bar">
             <div>💰 <span id="money">3,000,000</span>円</div>
             <div>⭐ <span id="reputation">0</span>pt</div>
-            <div>👥 スタッフ: <span id="staff-count">0</span>人</div>
+            <div>👥 スタッフ: <span id="staff-count">0</span>名</div>
         </div>
     </header>
 
     <div id="viewport"></div>
 
     <nav id="nav-tabs" style="display: none;">
-        <button class="tab-item active" id="tab-kitchen" onclick="switchTab('kitchen')">🍳 厨房・価格</button>
-        <button class="tab-item" id="tab-staff" onclick="switchTab('staff')">👥 人事・研修</button>
-        <button class="tab-item" id="tab-promo" onclick="switchTab('promo')">📢 宣伝・集客</button>
-        <button class="tab-item" id="tab-report" onclick="switchTab('report')">📊 経営レポート</button>
-        <button class="tab-item" id="tab-reviews" onclick="switchTab('reviews')">⭐ 口コミ</button>
-        <button class="tab-item" id="tab-shop" onclick="switchTab('shop')">⚙️ 設備・改装</button>
+        <button class="tab-item active" id="tab-kitchen" onclick="switchTab('kitchen')">
+            <span class="icon">🍳</span><span>厨房・価格</span>
+        </button>
+        <button class="tab-item" id="tab-staff" onclick="switchTab('staff')">
+            <span class="icon">👥</span><span>人事・研修</span>
+        </button>
+        <button class="tab-item" id="tab-promo" onclick="switchTab('promo')">
+            <span class="icon">📢</span><span>宣伝・集客</span>
+        </button>
+        <button class="tab-item" id="tab-report" onclick="switchTab('report')">
+            <span class="icon">📊</span><span>経営レポート</span>
+        </button>
+        <button class="tab-item" id="tab-reviews" onclick="switchTab('reviews')">
+            <span class="icon">⭐</span><span>口コミ</span>
+        </button>
+        <button class="tab-item" id="tab-shop" onclick="switchTab('shop')">
+            <span class="icon">⚙️</span><span>設備・拡張</span>
+        </button>
     </nav>
 </div>
 
-<!-- STREAMING_CHUNK:Configuring state and core game functions... -->
+<!-- STREAMING_CHUNK:Configuring state and mobile logic... -->
 <script>
     let state = {
         money: 3000000,
         reputation: 0,
         hasShop: false,
         shopType: '',
-        concept: 'standard', // standard, retro, modern, sweet
+        concept: 'standard',
         currentTab: 'kitchen',
         hour: 8,
         weather: '晴れ',
@@ -307,15 +361,15 @@
             { id: 'cake', name: '特製ショートケーキ', category: 'sweet', icon: '🍰', reqEquip: 'patisserieOven', ingKey: 'fruits', ingCost: 350, stdPrice: 1500, price: 1500, unlocked: false, stock: 0 }
         ],
 
-        // 口口コミ履歴
+        // 口コミ履歴
         reviews: [
-            { stars: '⭐⭐⭐⭐⭐', text: 'オープンを心待ちにしていました！期待しています。', author: '地域住民' }
+            { stars: '⭐⭐⭐⭐⭐', text: 'オープンの日を楽しみにしています！', author: '近所の住民' }
         ]
     };
 
     function init() {
         render();
-        setInterval(gameClockLoop, 3000); // 3秒で1時間経過
+        setInterval(gameClockLoop, 3000); // 3秒で1時間進行
         setInterval(customerLoop, 1500);   // 来店判定
     }
 
@@ -325,7 +379,7 @@
         
         state.hour = (state.hour + 1) % 24;
         if (state.hour === 0) {
-            state.hour = 7; // 夜間休業して朝7時に開店
+            state.hour = 7; // 朝7時に開店
             const weathers = ['晴れ', '晴れ', '曇り', '雨', '猛暑'];
             state.weather = weathers[Math.floor(Math.random() * weathers.length)];
             
@@ -334,7 +388,7 @@
             if (dailyLabor > 0) {
                 state.money -= dailyLabor;
                 state.totalLaborCost += dailyLabor;
-                showFloatText(`人件費精算 -${dailyLabor.toLocaleString()}円`);
+                showFloatText(`人件費清算 -${dailyLabor.toLocaleString()}円`);
             }
         }
 
@@ -352,16 +406,16 @@
         
         let timeZone = "通常";
         if (state.hour >= 7 && state.hour < 11) timeZone = "モーニング";
-        else if (state.hour >= 11 && state.hour < 14) timeZone = "ランチピーク";
-        else if (state.hour >= 14 && state.hour < 17) timeZone = "カフェタイム";
-        else if (state.hour >= 17) timeZone = "ディナー・夜";
+        else if (state.hour >= 11 && state.hour < 14) timeZone = "ランチ";
+        else if (state.hour >= 14 && state.hour < 17) timeZone = "カフェ";
+        else if (state.hour >= 17) timeZone = "ディナー";
 
         document.getElementById('time-display').innerText = `${String(state.hour).padStart(2, '0')}:00 (${timeZone})`;
         document.getElementById('weather-display').innerText = state.weather;
         document.getElementById('buzz-display').innerText = Math.round(state.buzzMultiplier * 100) + '%';
     }
 
-    // STREAMING_CHUNK:Rendering view and handling setup layout...
+    // STREAMING_CHUNK:Rendering viewport and mobile initial choice view...
     function render() {
         renderHeader();
         const view = document.getElementById('viewport');
@@ -370,28 +424,28 @@
         if (!state.hasShop) {
             document.getElementById('nav-tabs').style.display = 'none';
             view.innerHTML = `
-                <div class="card" style="text-align:center; padding:16px 10px;">
-                    <div style="font-size:2.5rem;">☕</div>
-                    <h2 style="font-size:1.1rem; margin-bottom:4px;">カフェ開業準備</h2>
-                    <p style="font-size:0.75rem; color:var(--text-sub);">資金 3,000,000円 でスタート。お店のコンセプトを選択して開業してください。</p>
+                <div class="card" style="text-align:center; padding:18px 12px; background:linear-gradient(135deg, #fff, #fbe9e7);">
+                    <div style="font-size:2.8rem; margin-bottom:4px;">☕</div>
+                    <h2 style="font-size:1.15rem; color:var(--accent-brown);">カフェの開業計画</h2>
+                    <p style="font-size:0.78rem; color:var(--text-sub); margin-top:4px;">資金 3,000,000円 でスタート。<br>出店するお店のコンセプトを選択してください。</p>
                 </div>
 
-                <div class="card" style="text-align:left; background:#fff;">
-                    <strong>☕ サードウェーブ本格カフェ</strong><br>
-                    <small style="color:var(--text-sub);">珈琲の味にこだわる。コーヒー・ラテの売れ行き向上</small>
-                    <button class="action-btn" onclick="startShop('自家焙煎本格カフェ', 'modern', 1500000)">1,500,000円で物件契約</button>
+                <div class="card">
+                    <div style="font-weight:bold; font-size:1rem; color:var(--accent-brown);">☕ サードウェーブ本格カフェ</div>
+                    <div style="font-size:0.78rem; color:var(--text-sub); margin:4px 0 8px 0;">珈琲の品質を追求。コーヒー・ラテの需要と客単価が高い。</div>
+                    <button class="action-btn" onclick="startShop('自家焙煎本格カフェ', 'modern', 1500000)">1,500,000円で出店契約</button>
                 </div>
 
-                <div class="card" style="text-align:left; background:#fff;">
-                    <strong>🛋️ レトロ純喫茶</strong><br>
-                    <small style="color:var(--text-sub);">落ち着いた空間。トースト・フード類の需要向上</small>
-                    <button class="action-btn" onclick="startShop('純喫茶 珈琲館', 'retro', 1200000)">1,200,000円で物件契約</button>
+                <div class="card">
+                    <div style="font-weight:bold; font-size:1rem; color:var(--accent-brown);">🛋️ 昭和レトロ純喫茶</div>
+                    <div style="font-size:0.78rem; color:var(--text-sub); margin:4px 0 8px 0;">落ち着いたレトロ空間。トーストやフード類の販売効率向上。</div>
+                    <button class="action-btn" onclick="startShop('純喫茶 珈琲館', 'retro', 1200000)">1,200,000円で出店契約</button>
                 </div>
 
-                <div class="card" style="text-align:left; background:#fff;">
-                    <strong>🍰 映えスイーツカフェ</strong><br>
-                    <small style="color:var(--text-sub);">若年層に人気。ケーキの単価UP＆SNS拡散率高</small>
-                    <button class="action-btn" onclick="startShop('Sweets & Cafe', 'sweet', 1800000)">1,800,000円で物件契約</button>
+                <div class="card">
+                    <div style="font-weight:bold; font-size:1rem; color:var(--accent-brown);">🍰 映えスイーツカフェ</div>
+                    <div style="font-size:0.78rem; color:var(--text-sub); margin:4px 0 8px 0;">SNS世代に人気。ケーキの利益率が高く集客キャンペーン効果絶大。</div>
+                    <button class="action-btn" onclick="startShop('Sweets & Cafe', 'sweet', 1800000)">1,800,000円で出店契約</button>
                 </div>
             `;
             return;
@@ -411,29 +465,29 @@
         if (state.currentTab === 'shop') renderShop(view);
     }
 
-    // STREAMING_CHUNK:Rendering kitchen and management views...
+    // STREAMING_CHUNK:Rendering kitchen and items...
     function renderKitchen(view) {
         const supplier = document.createElement('div');
         supplier.className = 'card';
         supplier.style.background = '#fff8e1';
         supplier.innerHTML = `
             <div class="card-title">📦 原材料の卸仕入れ</div>
-            <div style="font-size:0.75rem; display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>☕ 珈琲豆 (50杯分): 4,000円 [所持: ${state.ingredients.beans}]</span>
-                    <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('beans', 4000, 50)">仕入れる</button>
+                    <span>☕ 珈琲豆 (50杯): 4,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.beans}</small></span>
+                    <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('beans', 4000, 50)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🥛 特選牛乳 (30杯分): 3,300円 [所持: ${state.ingredients.milk}]</span>
-                    <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('milk', 3300, 30)">仕入れる</button>
+                    <span>🥛 特選牛乳 (30杯): 3,300円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.milk}</small></span>
+                    <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('milk', 3300, 30)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🍞 小麦粉・パン資材 (20食): 3,000円 [所持: ${state.ingredients.flour}]</span>
-                    <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('flour', 3000, 20)">仕入れる</button>
+                    <span>🍞 パン資材 (20食): 3,000円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.flour}</small></span>
+                    <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('flour', 3000, 20)">購入</button>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>🍰 いちご・果物資材 (10食): 3,500円 [所持: ${state.ingredients.fruits}]</span>
-                    <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('fruits', 3500, 10)">仕入れる</button>
+                    <span>🍰 果物資材 (10食): 3,500円<br><small style="color:var(--text-sub);">在庫: ${state.ingredients.fruits}</small></span>
+                    <button style="padding:6px 12px; background:var(--accent-brown); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyIng('fruits', 3500, 10)">購入</button>
                 </div>
             </div>
         `;
@@ -446,18 +500,20 @@
             card.innerHTML = `
                 <div class="card-title">
                     <span>${r.icon} ${r.name}</span>
-                    <span style="font-size:0.75rem; background:#ffe0b2; padding:2px 6px; border-radius:4px;">在庫: ${r.stock}個</span>
+                    <span style="font-size:0.75rem; background:#ffe0b2; padding:2px 8px; border-radius:12px; color:#e65100;">仕込み数: ${r.stock}個</span>
                 </div>
-                <div style="font-size:0.75rem; color:var(--text-sub);">原価: 約${r.ingCost}円 | 標準相場: ${r.stdPrice}円</div>
+                <div style="font-size:0.78rem; color:var(--text-sub);">原価: 約${r.ingCost}円 | 標準価格: ${r.stdPrice}円</div>
                 
                 <div class="price-box">
-                    <span>提供価格:</span>
-                    <input type="number" class="price-input" id="price-${r.id}" value="${r.price}"> 円
-                    <button style="padding:2px 6px; background:#1976d2; color:#fff; border:none; border-radius:4px;" onclick="setPrice('${r.id}')">決定</button>
+                    <span>販売価格の設定:</span>
+                    <div>
+                        <input type="number" class="price-input" id="price-${r.id}" value="${r.price}"> 円
+                        <button style="padding:6px 10px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-size:0.8rem; margin-left:4px;" onclick="setPrice('${r.id}')">保存</button>
+                    </div>
                 </div>
 
                 <button class="action-btn" ${!hasIng ? 'disabled' : ''} onclick="cookRecipe('${r.id}')">
-                    ${hasIng ? '仕込み調理する (材料1消費)' : '材料切れ'}
+                    ${hasIng ? '仕込み調理を行う (材料1消費)' : '原材料が不足しています'}
                 </button>
             `;
             view.appendChild(card);
@@ -467,21 +523,21 @@
     function renderStaff(view) {
         view.innerHTML = `
             <div class="card">
-                <div class="card-title">👥 スタッフの雇用と育成</div>
-                <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:10px;">スタッフを雇うと自動的に仕込みや接客を行い、混雑に対応できます。</p>
+                <div class="card-title">👥 スタッフの採用・育成</div>
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:12px;">スタッフを採用すると混雑時でもスムーズに提供が行えます。</p>
                 
-                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
-                        <span>🙋‍♂️ アルバイト: <strong>${state.staff.partTime}名</strong><br><small>日給: 9,600円 / 人</small></span>
-                        <button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="hireStaff('partTime', 50000)">採用 (手数料5万円)</button>
+                <div style="font-size:0.82rem; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
+                        <span>🙋‍♂️ アルバイト: <strong>${state.staff.partTime}名</strong><br><small style="color:var(--text-sub);">日給: 9,600円 / 人</small></span>
+                        <button style="padding:8px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="hireStaff('partTime', 50000)">採用 (5万円)</button>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
-                        <span>👨‍🍳 専属シェフ・店長: <strong>${state.staff.fullTime}名</strong><br><small>日給: 16,000円 / 人</small></span>
-                        <button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="hireStaff('fullTime', 150000)">採用 (手数料15万円)</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:8px;">
+                        <span>👨‍🍳 専属シェフ: <strong>${state.staff.fullTime}名</strong><br><small style="color:var(--text-sub);">日給: 16,000円 / 人</small></span>
+                        <button style="padding:8px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="hireStaff('fullTime', 150000)">採用 (15万円)</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🎓 スキル研修レベル: <strong>Lv.${state.staff.skillLevel}</strong><br><small>調理・提供速度 +15%</small></span>
-                        <button style="padding:6px 12px; background:#1976d2; color:#fff; border:none; border-radius:4px;" onclick="trainStaff(100000)">研修開催 (10万円)</button>
+                        <span>🎓 研修レベル: <strong>Lv.${state.staff.skillLevel}</strong><br><small style="color:var(--text-sub);">提供スピード +15%</small></span>
+                        <button style="padding:8px 12px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="trainStaff(100000)">研修 (10万円)</button>
                     </div>
                 </div>
             </div>
@@ -491,25 +547,25 @@
     function renderPromo(view) {
         view.innerHTML = `
             <div class="card">
-                <div class="card-title">📢 プロモーション・集客</div>
-                <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:10px;">広告を出して一時的に集客力（バズ率）を高めます。</p>
+                <div class="card-title">📢 プロモーション活動</div>
+                <p style="font-size:0.78rem; color:var(--text-sub); margin-bottom:10px;">宣伝により集客力（バズ率）を高め、来店頻度を上昇させます。</p>
 
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div style="border:1px solid var(--border-color); padding:8px; border-radius:6px;">
-                        <strong>📄 近隣ポスティングチラシ</strong><br>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                        <strong>📄 近隣チラシ配り</strong><br>
                         <small style="color:var(--text-sub);">費用: 30,000円 | 集客力 +30%</small>
                         <button class="action-btn" onclick="runPromo(30000, 0.3)">チラシを配る</button>
                     </div>
 
-                    <div style="border:1px solid var(--border-color); padding:8px; border-radius:6px;">
-                        <strong>📱 SNS映えプレゼントキャンペーン</strong><br>
-                        <small style="color:var(--text-sub);">費用: 100,000円 | 集客力 +80% (拡散効果)</small>
-                        <button class="action-btn" onclick="runPromo(100000, 0.8)">キャンペーン開催</button>
+                    <div style="border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                        <strong>📱 SNS映えプレゼント企画</strong><br>
+                        <small style="color:var(--text-sub);">費用: 100,000円 | 集客力 +80%</small>
+                        <button class="action-btn" onclick="runPromo(100000, 0.8)">企画を実施する</button>
                     </div>
 
-                    <div style="border:1px solid var(--border-color); padding:8px; border-radius:6px;">
-                        <strong>📺 地域グルメ情報誌・WEB取材依頼</strong><br>
-                        <small style="color:var(--text-sub);">費用: 300,000円 | 集客力 +200% (超爆発)</small>
+                    <div style="border:1px solid var(--border-color); padding:10px; border-radius:8px;">
+                        <strong>📺 グルメ誌・WEB取材獲得</strong><br>
+                        <small style="color:var(--text-sub);">費用: 300,000円 | 集客力 +200% (大爆発)</small>
                         <button class="action-btn" onclick="runPromo(300000, 2.0)">取材を依頼する</button>
                     </div>
                 </div>
@@ -524,15 +580,15 @@
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">📊 損益計算書 (P&L)</div>
-                <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:6px;">
+                <div style="font-size:0.85rem; display:flex; flex-direction:column; gap:8px;">
                     <div style="display:flex; justify-content:space-between;"><span>💵 売上高:</span><strong>+${state.totalRevenue.toLocaleString()}円</strong></div>
-                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>📦 原価支出:</span><span>-${state.totalCost.toLocaleString()}円</span></div>
+                    <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>📦 仕入れ原価:</span><span>-${state.totalCost.toLocaleString()}円</span></div>
                     <div style="border-bottom:1px solid #ccc; margin:2px 0;"></div>
                     <div style="display:flex; justify-content:space-between;"><span>📈 売上総利益 (粗利):</span><strong>${grossProfit.toLocaleString()}円</strong></div>
                     <div style="display:flex; justify-content:space-between; color:var(--accent-red);"><span>👥 人件費累計:</span><span>-${state.totalLaborCost.toLocaleString()}円</span></div>
                     <div style="border-bottom:2px solid var(--border-color); margin:4px 0;"></div>
-                    <div style="display:flex; justify-content:space-between; font-size:1rem; font-weight:bold;">
-                        <span>💰 純利益:</span>
+                    <div style="display:flex; justify-content:space-between; font-size:1.05rem; font-weight:bold;">
+                        <span>💰 営業純利益:</span>
                         <span style="color:${netProfit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${netProfit.toLocaleString()}円</span>
                     </div>
                 </div>
@@ -541,15 +597,15 @@
     }
 
     function renderReviews(view) {
-        let html = `<div class="card"><div class="card-title">⭐ お客様の口コミレビュー</div>`;
+        let html = `<div class="card"><div class="card-title">⭐ お客様のリアル口コミ</div>`;
         state.reviews.slice(-6).reverse().forEach(r => {
             html += `
                 <div class="review-box">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; margin-bottom:2px;">
                         <span>${r.stars}</span>
-                        <span style="color:var(--text-sub);">${r.author}</span>
+                        <span style="color:var(--text-sub); font-size:0.75rem;">${r.author}</span>
                     </div>
-                    <div style="margin-top:4px;">"${r.text}"</div>
+                    <div>"${r.text}"</div>
                 </div>
             `;
         });
@@ -560,30 +616,30 @@
     function renderShop(view) {
         view.innerHTML = `
             <div class="card">
-                <div class="card-title">⚙️ 厨房設備・レシピ解放</div>
-                <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🧾 レジ＆カウンター (必須): ${state.equipment.counter ? '✅導入済' : '350,000円'}</span>
-                        ${!state.equipment.counter ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('counter', 350000)">導入</button>` : ''}
+                <div class="card-title">⚙️ 設備投資・メニュー解放</div>
+                <div style="font-size:0.82rem; display:flex; flex-direction:column; gap:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
+                        <span>🧾 メインカウンターレジ<br><small style="color:var(--text-sub);">${state.equipment.counter ? '✅導入完了' : '350,000円'}</small></span>
+                        ${!state.equipment.counter ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('counter', 350000)">購入</button>` : ''}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
+                        <span>☕ エスプレッソマシン<br><small style="color:var(--text-sub);">${state.equipment.coffeeMaker ? '✅導入完了' : '480,000円 (ラテ解放)'}</small></span>
+                        ${!state.equipment.coffeeMaker ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('coffeeMaker', 480000)">購入</button>` : ''}
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
+                        <span>🍞 厨房IHトースター<br><small style="color:var(--text-sub);">${state.equipment.kitchenLine ? '✅導入完了' : '300,000円 (トースト解放)'}</small></span>
+                        ${!state.equipment.kitchenLine ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('kitchenLine', 300000)">購入</button>` : ''}
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>☕ エスプレッソマシン: ${state.equipment.coffeeMaker ? '✅導入済' : '480,000円'}</span>
-                        ${!state.equipment.coffeeMaker ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('coffeeMaker', 480000)">導入</button>` : ''}
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🍞 厨房IH＆トースター: ${state.equipment.kitchenLine ? '✅導入済' : '300,000円'}</span>
-                        ${!state.equipment.kitchenLine ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('kitchenLine', 300000)">導入</button>` : ''}
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>🍰 コンベクションオーブン: ${state.equipment.patisserieOven ? '✅導入済' : '600,000円'}</span>
-                        ${!state.equipment.patisserieOven ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('patisserieOven', 600000)">導入</button>` : ''}
+                        <span>🍰 コンベクションオーブン<br><small style="color:var(--text-sub);">${state.equipment.patisserieOven ? '✅導入完了' : '600,000円 (ケーキ解放)'}</small></span>
+                        ${!state.equipment.patisserieOven ? `<button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:6px; font-weight:bold;" onclick="buyEquip('patisserieOven', 600000)">購入</button>` : ''}
                     </div>
                 </div>
             </div>
         `;
     }
 
-    // STREAMING_CHUNK:Action and simulation handlers...
+    // STREAMING_CHUNK:Handlers and interactions...
     function startShop(name, concept, cost) {
         if (state.money >= cost) {
             state.money -= cost;
@@ -660,7 +716,7 @@
             if (key === 'kitchenLine') unlockRecipe('toast');
             if (key === 'patisserieOven') unlockRecipe('cake');
 
-            showFloatText(`設備導入！`);
+            showFloatText(`設備導入完了！`);
             render();
         }
     }
@@ -676,15 +732,15 @@
         const available = state.recipes.filter(r => r.unlocked && r.stock > 0);
         if (available.length === 0) return;
 
-        let chance = 0.4 * state.buzzMultiplier;
-        if (state.weather === '雨') chance *= 0.6;
+        let chance = 0.45 * state.buzzMultiplier;
+        if (state.weather === '雨') chance *= 0.65;
         if (state.weather === '猛暑') chance *= 0.8;
 
         if (Math.random() < chance) {
             const target = available[Math.floor(Math.random() * available.length)];
             
             if (target.price > target.stdPrice * 1.4) {
-                addReview('⭐', `「${target.name}」が高すぎる...もう少し安ければいいのに。`);
+                addReview('⭐', `「${target.name}」の値段が少し高すぎます...`);
                 return;
             }
 
@@ -694,8 +750,8 @@
             state.reputation += 2;
             showFloatText(`+${target.price.toLocaleString()}円`);
 
-            if (Math.random() < 0.2) {
-                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が最高に美味しかったです！また来ます。`);
+            if (Math.random() < 0.25) {
+                addReview('⭐⭐⭐⭐⭐', `「${target.name}」が最高でした！満足です。`);
             }
 
             render();
@@ -703,7 +759,7 @@
     }
 
     function addReview(stars, text) {
-        state.reviews.push({ stars, text, author: '来店客' });
+        state.reviews.push({ stars, text, author: 'お客様' });
         if (state.reviews.length > 20) state.reviews.shift();
     }
 
@@ -720,13 +776,12 @@
         el.className = 'float-text';
         el.innerText = txt;
         el.style.left = '50%';
-        el.style.top = '30%';
-        el.style.transform = 'translate(-50%, -50%)';
+        el.style.top = '38%';
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 800);
+        setTimeout(() => el.remove(), 850);
     }
 
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
