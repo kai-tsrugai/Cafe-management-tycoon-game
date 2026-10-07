@@ -1,9 +1,11 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>本格カフェ経営シミュレーション - 完全版</title>
+    <title>本格カフェ経営シミュレーション - 完全修正版</title>
+    <!-- STREAMING_CHUNK:Styling the interface... -->
     <style>
         :root {
             --bg-color: #f4ede4;
@@ -31,7 +33,10 @@
             color: var(--text-main);
             display: flex;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         #game-container {
@@ -41,8 +46,10 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            max-height: 100vh;
             position: relative;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
 
         /* ヘッダー */
@@ -51,6 +58,8 @@
             color: #ffffff;
             padding: 10px 14px;
             border-bottom: 3px solid #3e2723;
+            shrink: 0;
+            z-index: 10;
         }
 
         .header-top {
@@ -85,14 +94,15 @@
             color: #ffffff;
         }
 
-        /* ビューポート */
+        /* スクロール可能なメインビュー領域 */
         #viewport {
-            flex: 1;
+            flex: 1 1 auto;
             padding: 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .card {
@@ -101,6 +111,7 @@
             padding: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
             border: 1px solid var(--border-color);
+            shrink: 0;
         }
 
         .card-title {
@@ -157,35 +168,22 @@
             border-radius: 4px;
         }
 
-        .progress-container {
-            width: 100%;
-            background: #e0e0e0;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-orange);
-            transition: width 0.1s linear;
-        }
-
-        /* タブバー */
+        /* ボトムナビゲーション */
         #nav-tabs {
             display: flex;
             background: var(--accent-brown);
             overflow-x: auto;
+            shrink: 0;
+            z-index: 10;
+            border-top: 2px solid #3e2723;
         }
 
         .tab-item {
             flex: 1;
-            min-width: 70px;
-            padding: 10px 4px;
+            min-width: 65px;
+            padding: 12px 4px;
             text-align: center;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             font-weight: bold;
             color: #d7ccc8;
             border: none;
@@ -228,6 +226,7 @@
 </head>
 <body>
 
+<!-- STREAMING_CHUNK:Initializing HTML layout... -->
 <div id="game-container">
     <header>
         <div class="header-top">
@@ -258,6 +257,7 @@
     </nav>
 </div>
 
+<!-- STREAMING_CHUNK:Configuring state and core game functions... -->
 <script>
     let state = {
         money: 3000000,
@@ -280,7 +280,7 @@
         staff: {
             partTime: 0,
             fullTime: 0,
-            skillLevel: 1 // 調理速度UP
+            skillLevel: 1
         },
 
         // 設備
@@ -301,13 +301,13 @@
 
         // レシピ
         recipes: [
-            { id: 'coffee', name: 'ハウスブレンド', category: 'drink', icon: '☕', reqEquip: 'coffeeMaker', ingKey: 'beans', ingCost: 80, stdPrice: 550, price: 550, speed: 2, unlocked: true, stock: 0 },
-            { id: 'latte', name: '濃厚カフェラテ', category: 'drink', icon: '🥛', reqEquip: 'coffeeMaker', ingKey: 'milk', ingCost: 110, stdPrice: 650, price: 650, speed: 3, unlocked: false, stock: 0 },
-            { id: 'toast', name: '厚切りバタートースト', category: 'food', icon: '🍞', reqEquip: 'kitchenLine', ingKey: 'flour', ingCost: 150, stdPrice: 700, price: 700, speed: 4, unlocked: false, stock: 0 },
-            { id: 'cake', name: '特製ショートケーキ', category: 'sweet', icon: '🍰', reqEquip: 'patisserieOven', ingKey: 'fruits', ingCost: 350, stdPrice: 1500, price: 1500, speed: 7, unlocked: false, stock: 0 }
+            { id: 'coffee', name: 'ハウスブレンド', category: 'drink', icon: '☕', reqEquip: 'coffeeMaker', ingKey: 'beans', ingCost: 80, stdPrice: 550, price: 550, unlocked: true, stock: 0 },
+            { id: 'latte', name: '濃厚カフェラテ', category: 'drink', icon: '🥛', reqEquip: 'coffeeMaker', ingKey: 'milk', ingCost: 110, stdPrice: 650, price: 650, unlocked: false, stock: 0 },
+            { id: 'toast', name: '厚切りバタートースト', category: 'food', icon: '🍞', reqEquip: 'kitchenLine', ingKey: 'flour', ingCost: 150, stdPrice: 700, price: 700, unlocked: false, stock: 0 },
+            { id: 'cake', name: '特製ショートケーキ', category: 'sweet', icon: '🍰', reqEquip: 'patisserieOven', ingKey: 'fruits', ingCost: 350, stdPrice: 1500, price: 1500, unlocked: false, stock: 0 }
         ],
 
-        // 口コミ履歴
+        // 口口コミ履歴
         reviews: [
             { stars: '⭐⭐⭐⭐⭐', text: 'オープンを心待ちにしていました！期待しています。', author: '地域住民' }
         ]
@@ -319,18 +319,17 @@
         setInterval(customerLoop, 1500);   // 来店判定
     }
 
-    // ゲーム内時間の進展（モーニング・ランチ・ピーク等）
+    // STREAMING_CHUNK:Defining game loop and header updates...
     function gameClockLoop() {
         if (!state.hasShop) return;
         
         state.hour = (state.hour + 1) % 24;
         if (state.hour === 0) {
             state.hour = 7; // 夜間休業して朝7時に開店
-            // 天候シャッフル
             const weathers = ['晴れ', '晴れ', '曇り', '雨', '猛暑'];
             state.weather = weathers[Math.floor(Math.random() * weathers.length)];
             
-            // 人件費の自動引き落とし（アルバイト時給1200円×8時間換算）
+            // 人件費の自動引き落とし
             const dailyLabor = (state.staff.partTime * 9600) + (state.staff.fullTime * 16000);
             if (dailyLabor > 0) {
                 state.money -= dailyLabor;
@@ -339,7 +338,6 @@
             }
         }
 
-        // 宣伝効果の減衰
         if (state.buzzMultiplier > 1.0) {
             state.buzzMultiplier = Math.max(1.0, state.buzzMultiplier - 0.05);
         }
@@ -363,6 +361,7 @@
         document.getElementById('buzz-display').innerText = Math.round(state.buzzMultiplier * 100) + '%';
     }
 
+    // STREAMING_CHUNK:Rendering view and handling setup layout...
     function render() {
         renderHeader();
         const view = document.getElementById('viewport');
@@ -371,28 +370,28 @@
         if (!state.hasShop) {
             document.getElementById('nav-tabs').style.display = 'none';
             view.innerHTML = `
-                <div class="card" style="text-align:center; padding:20px 10px;">
-                    <div style="font-size:3rem;">☕</div>
-                    <h2>カフェ開業準備</h2>
-                    <p style="font-size:0.8rem; color:var(--text-sub); margin:10px 0;">資金 3,000,000円 でスタート。お店のコンセプトを選択して契約してください。</p>
+                <div class="card" style="text-align:center; padding:16px 10px;">
+                    <div style="font-size:2.5rem;">☕</div>
+                    <h2 style="font-size:1.1rem; margin-bottom:4px;">カフェ開業準備</h2>
+                    <p style="font-size:0.75rem; color:var(--text-sub);">資金 3,000,000円 でスタート。お店のコンセプトを選択して開業してください。</p>
+                </div>
 
-                    <div class="card" style="text-align:left; background:#fff; margin-bottom:8px;">
-                        <strong>☕ サードウェーブ本格カフェ</strong><br>
-                        <small>珈琲の味にこだわる。コーヒー・ラテの売れ行き向上</small>
-                        <button class="action-btn" onclick="startShop('自家焙煎本格カフェ', 'modern', 1500000)">1,500,000円で物件契約</button>
-                    </div>
+                <div class="card" style="text-align:left; background:#fff;">
+                    <strong>☕ サードウェーブ本格カフェ</strong><br>
+                    <small style="color:var(--text-sub);">珈琲の味にこだわる。コーヒー・ラテの売れ行き向上</small>
+                    <button class="action-btn" onclick="startShop('自家焙煎本格カフェ', 'modern', 1500000)">1,500,000円で物件契約</button>
+                </div>
 
-                    <div class="card" style="text-align:left; background:#fff; margin-bottom:8px;">
-                        <strong>🛋️ レトロ純喫茶</strong><br>
-                        <small>落ち着いた空間。トースト・フード類の需要向上</small>
-                        <button class="action-btn" onclick="startShop('純喫茶 珈琲館', 'retro', 1200000)">1,200,000円で物件契約</button>
-                    </div>
+                <div class="card" style="text-align:left; background:#fff;">
+                    <strong>🛋️ レトロ純喫茶</strong><br>
+                    <small style="color:var(--text-sub);">落ち着いた空間。トースト・フード類の需要向上</small>
+                    <button class="action-btn" onclick="startShop('純喫茶 珈琲館', 'retro', 1200000)">1,200,000円で物件契約</button>
+                </div>
 
-                    <div class="card" style="text-align:left; background:#fff;">
-                        <strong>🍰 映えスイーツカフェ</strong><br>
-                        <small>若年層に人気。ケーキ・パフェの単価UP＆SNS拡散率高</small>
-                        <button class="action-btn" onclick="startShop('Sweets & Cafe', 'sweet', 1800000)">1,800,000円で物件契約</button>
-                    </div>
+                <div class="card" style="text-align:left; background:#fff;">
+                    <strong>🍰 映えスイーツカフェ</strong><br>
+                    <small style="color:var(--text-sub);">若年層に人気。ケーキの単価UP＆SNS拡散率高</small>
+                    <button class="action-btn" onclick="startShop('Sweets & Cafe', 'sweet', 1800000)">1,800,000円で物件契約</button>
                 </div>
             `;
             return;
@@ -412,9 +411,8 @@
         if (state.currentTab === 'shop') renderShop(view);
     }
 
-    // 🍳 厨房・価格・仕入れ
+    // STREAMING_CHUNK:Rendering kitchen and management views...
     function renderKitchen(view) {
-        // 原材料仕入れカード
         const supplier = document.createElement('div');
         supplier.className = 'card';
         supplier.style.background = '#fff8e1';
@@ -429,11 +427,11 @@
                     <span>🥛 特選牛乳 (30杯分): 3,300円 [所持: ${state.ingredients.milk}]</span>
                     <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('milk', 3300, 30)">仕入れる</button>
                 </div>
-                <div style="display:flex; justify-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span>🍞 小麦粉・パン資材 (20食): 3,000円 [所持: ${state.ingredients.flour}]</span>
                     <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('flour', 3000, 20)">仕入れる</button>
                 </div>
-                <div style="display:flex; justify-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span>🍰 いちご・果物資材 (10食): 3,500円 [所持: ${state.ingredients.fruits}]</span>
                     <button style="padding:4px 8px; background:var(--accent-brown); color:#fff; border:none; border-radius:4px;" onclick="buyIng('fruits', 3500, 10)">仕入れる</button>
                 </div>
@@ -441,7 +439,6 @@
         `;
         view.appendChild(supplier);
 
-        // 商品調理・価格設定
         state.recipes.filter(r => r.unlocked).forEach(r => {
             const hasIng = state.ingredients[r.ingKey] > 0;
             const card = document.createElement('div');
@@ -467,7 +464,6 @@
         });
     }
 
-    // 👥 人事・研修
     function renderStaff(view) {
         view.innerHTML = `
             <div class="card">
@@ -480,7 +476,7 @@
                         <button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="hireStaff('partTime', 50000)">採用 (手数料5万円)</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:6px;">
-                        <span>👨‍🍳 専属シェフ・店長: <strong>${state.staff.fullTime}名</strong><br><small>日給: 16,000円 / 人 (品質UP)</small></span>
+                        <span>👨‍🍳 専属シェフ・店長: <strong>${state.staff.fullTime}名</strong><br><small>日給: 16,000円 / 人</small></span>
                         <button style="padding:6px 12px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="hireStaff('fullTime', 150000)">採用 (手数料15万円)</button>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -492,7 +488,6 @@
         `;
     }
 
-    // 📢 宣伝・集客
     function renderPromo(view) {
         view.innerHTML = `
             <div class="card">
@@ -522,7 +517,6 @@
         `;
     }
 
-    // 📊 経営レポート（損益計算書）
     function renderReport(view) {
         const grossProfit = state.totalRevenue - state.totalCost;
         const netProfit = grossProfit - state.totalLaborCost - state.totalWasteCost;
@@ -546,13 +540,12 @@
         `;
     }
 
-    // ⭐ 口コミ・レビュー
     function renderReviews(view) {
         let html = `<div class="card"><div class="card-title">⭐ お客様の口コミレビュー</div>`;
         state.reviews.slice(-6).reverse().forEach(r => {
             html += `
                 <div class="review-box">
-                    <div style="display:flex; justify-between; font-weight:bold;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
                         <span>${r.stars}</span>
                         <span style="color:var(--text-sub);">${r.author}</span>
                     </div>
@@ -564,25 +557,24 @@
         view.innerHTML = html;
     }
 
-    // ⚙️ 設備・改装・レシピ開発
     function renderShop(view) {
         view.innerHTML = `
             <div class="card">
                 <div class="card-title">⚙️ 厨房設備・レシピ解放</div>
                 <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span>🧾 レジ＆カウンター (必須): ${state.equipment.counter ? '✅導入済' : '350,000円'}</span>
                         ${!state.equipment.counter ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('counter', 350000)">導入</button>` : ''}
                     </div>
-                    <div style="display:flex; justify-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span>☕ エスプレッソマシン: ${state.equipment.coffeeMaker ? '✅導入済' : '480,000円'}</span>
                         ${!state.equipment.coffeeMaker ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('coffeeMaker', 480000)">導入</button>` : ''}
                     </div>
-                    <div style="display:flex; justify-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span>🍞 厨房IH＆トースター: ${state.equipment.kitchenLine ? '✅導入済' : '300,000円'}</span>
                         ${!state.equipment.kitchenLine ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('kitchenLine', 300000)">導入</button>` : ''}
                     </div>
-                    <div style="display:flex; justify-between; align-items:center;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span>🍰 コンベクションオーブン: ${state.equipment.patisserieOven ? '✅導入済' : '600,000円'}</span>
                         ${!state.equipment.patisserieOven ? `<button style="padding:4px 8px; background:var(--accent-green); color:#fff; border:none; border-radius:4px;" onclick="buyEquip('patisserieOven', 600000)">導入</button>` : ''}
                     </div>
@@ -591,7 +583,7 @@
         `;
     }
 
-    // 各種ロジック関数
+    // STREAMING_CHUNK:Action and simulation handlers...
     function startShop(name, concept, cost) {
         if (state.money >= cost) {
             state.money -= cost;
@@ -664,7 +656,6 @@
             state.money -= price;
             state.equipment[key] = true;
 
-            // 連動レシピ開発
             if (key === 'coffeeMaker') unlockRecipe('latte');
             if (key === 'kitchenLine') unlockRecipe('toast');
             if (key === 'patisserieOven') unlockRecipe('cake');
@@ -679,14 +670,12 @@
         if (r) r.unlocked = true;
     }
 
-    // 自動来店シミュレーション（天候・価格・コンセプト・スタッフ・バズが全連動）
     function customerLoop() {
         if (!state.hasShop || !state.equipment.counter) return;
 
         const available = state.recipes.filter(r => r.unlocked && r.stock > 0);
         if (available.length === 0) return;
 
-        // 来店確率計算
         let chance = 0.4 * state.buzzMultiplier;
         if (state.weather === '雨') chance *= 0.6;
         if (state.weather === '猛暑') chance *= 0.8;
@@ -694,7 +683,6 @@
         if (Math.random() < chance) {
             const target = available[Math.floor(Math.random() * available.length)];
             
-            // 価格感度判定
             if (target.price > target.stdPrice * 1.4) {
                 addReview('⭐', `「${target.name}」が高すぎる...もう少し安ければいいのに。`);
                 return;
@@ -706,7 +694,6 @@
             state.reputation += 2;
             showFloatText(`+${target.price.toLocaleString()}円`);
 
-            // ポジティブ口コミ
             if (Math.random() < 0.2) {
                 addReview('⭐⭐⭐⭐⭐', `「${target.name}」が最高に美味しかったです！また来ます。`);
             }
@@ -723,7 +710,8 @@
     function switchTab(t) {
         state.currentTab = t;
         document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
-        document.getElementById(`tab-${t}`).classList.add('active');
+        const activeBtn = document.getElementById(`tab-${t}`);
+        if (activeBtn) activeBtn.classList.add('active');
         render();
     }
 
@@ -742,3 +730,4 @@
 </script>
 </body>
 </html>
+```eof
